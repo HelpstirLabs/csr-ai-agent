@@ -136,9 +136,18 @@ Install the async driver: `pip install asyncpg`. The SQLModel schema creates tab
 
 ## AI Backend
 
-The AI layer is provider-agnostic. An `AIBackend` abstract class defines `generate()`, `stream()`, and `health_check()` methods. The `AIEngine` routes requests to the correct backend by model prefix.
+The AI layer is provider-agnostic. An `AIBackend` abstract class defines `generate()`, `stream()`, and `health_check()` methods. The `AIEngine` routes requests to the correct backend by model prefix. This means switching providers is a config change, not a code change.
 
-### Using Claude (default)
+Currently **Claude (Anthropic API)** is the active backend. **Ollama** (self-hosted open-source models) is fully wired up and ready to use — the decision on which to use in production will be made later based on cost, quality, and scale requirements.
+
+| | Claude (Anthropic API) | Ollama (self-hosted) |
+|---|---|---|
+| **Cost** | Pay-per-token (~$0.01–0.03/project on Haiku) | Zero API cost, but requires GPU hardware |
+| **Quality** | Best structured output, reliable JSON | Varies by model; may need more prompt tuning |
+| **Setup** | Just an API key | Ollama server + GPU (local or cloud) |
+| **Best for** | MVP, low-to-medium volume | High volume, offline/air-gapped, cost control at scale |
+
+### Using Claude (current default)
 
 Set your `ANTHROPIC_API_KEY` in `.env`. Project generation uses Claude to produce structured CSR proposals with:
 - Problem statements grounded in Indian development context
@@ -147,7 +156,7 @@ Set your `ANTHROPIC_API_KEY` in `.env`. Project generation uses Claude to produc
 - NGO recommendations ranked by theme/geography match and trust scores
 - Schedule VII compliance mapping
 
-### Using Ollama (local/open-source models)
+### Switching to Ollama (local/open-source models)
 
 ```bash
 # Set in .env

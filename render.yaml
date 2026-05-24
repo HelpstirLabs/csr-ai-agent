@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: helpstir
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-4-5-20251001
+      - key: DEFAULT_AI_BACKEND
+        value: claude
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./helpstir.db

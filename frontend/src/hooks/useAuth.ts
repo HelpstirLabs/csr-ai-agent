@@ -25,7 +25,6 @@ export function useAuth() {
     localStorage.setItem("role", res.role);
     localStorage.setItem("userId", String(res.user_id));
     setState({ token: res.access_token, role: res.role as UserRole, userId: res.user_id });
-    return res;
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string, role: string, organisation: string) => {
@@ -34,7 +33,6 @@ export function useAuth() {
     localStorage.setItem("role", res.role);
     localStorage.setItem("userId", String(res.user_id));
     setState({ token: res.access_token, role: res.role as UserRole, userId: res.user_id });
-    return res;
   }, []);
 
   const logout = useCallback(() => {

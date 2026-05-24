@@ -2,7 +2,7 @@
 name = "helpstir-backend"
 version = "0.1.0"
 description = "HELPSTiR CSR Intelligence Platform — backend"
-readme = "README.md"
+readme = {text = "", content-type = "text/plain"}
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.111.0",

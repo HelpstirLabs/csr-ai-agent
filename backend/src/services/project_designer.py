@@ -165,14 +165,19 @@ async def generate_project(
     except ValueError:
         pass
 
+    def _to_str(val: object) -> str:
+        if isinstance(val, (dict, list)):
+            return json.dumps(val, indent=2)
+        return str(val) if val else ""
+
     project = Project(
         funder_id=funder_id,
         status=ProjectStatus.GENERATED,
         title=parsed["title"],
-        problem_statement=parsed.get("problem_statement", ""),
-        intervention_logic=parsed.get("intervention_logic", ""),
-        projected_outcomes=parsed.get("projected_outcomes", ""),
-        me_framework=parsed.get("me_framework", ""),
+        problem_statement=_to_str(parsed.get("problem_statement", "")),
+        intervention_logic=_to_str(parsed.get("intervention_logic", "")),
+        projected_outcomes=_to_str(parsed.get("projected_outcomes", "")),
+        me_framework=_to_str(parsed.get("me_framework", "")),
         schedule_vii_head=schedule_head,
         brief_text=brief_text,
         brief_theme=theme,

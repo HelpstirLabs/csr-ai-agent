@@ -35,7 +35,6 @@ export default function LoginPage({ onLogin }: Props) {
           {error && <p className="error">{error}</p>}
           <button type="submit" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button>
         </form>
-        <p className="hint">Demo: csr@tatagroup.example.com / password123</p>
       </div>
     </div>
   );

@@ -54,9 +54,9 @@ function RenderMEFramework({ data }: { data: Record<string, unknown> }) {
                 <div className="me-indicator-meta">
                   <span>Baseline: {String(ind.baseline)}</span>
                   <span>Target: {String(ind.target)}{ind.unit ? ` ${ind.unit}` : ""}</span>
-                  {ind.frequency && <span>Frequency: {ind.frequency as string}</span>}
+                  {ind.frequency && <span>Frequency: {String(ind.frequency)}</span>}
                 </div>
-                {ind.data_source && <div className="me-indicator-source">Source: {ind.data_source as string}</div>}
+                {ind.data_source && <div className="me-indicator-source">Source: {String(ind.data_source)}</div>}
               </div>
             ))}
           </div>

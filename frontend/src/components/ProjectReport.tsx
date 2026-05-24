@@ -5,6 +5,129 @@ interface Props {
   project: ProjectDetail;
 }
 
+function tryParseJSON(text: string): unknown | null {
+  if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) return null;
+  try { return JSON.parse(text); } catch { return null; }
+}
+
+function RenderOutcomes({ data }: { data: Record<string, unknown> }) {
+  const sections: { key: string; label: string }[] = [
+    { key: "direct_intended", label: "Direct Intended Outcomes" },
+    { key: "indirect_intended", label: "Indirect Intended Outcomes" },
+    { key: "unintended_positive", label: "Unintended Positive Effects" },
+    { key: "risks_unintended_negative", label: "Risks & Unintended Negative Effects" },
+  ];
+
+  return (
+    <div className="structured-content">
+      {sections.map(({ key, label }) => {
+        const items = data[key];
+        if (!Array.isArray(items) || items.length === 0) return null;
+        return (
+          <div key={key} className="outcome-group">
+            <h4 className="outcome-label">{label}</h4>
+            <ul className="outcome-list">
+              {items.map((item: string, i: number) => <li key={i}>{item}</li>)}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RenderMEFramework({ data }: { data: Record<string, unknown> }) {
+  const indicators = data.indicators as Record<string, unknown[]> | undefined;
+  const milestones = data.milestone_schedule as Record<string, string[]> | undefined;
+  const collection = data.data_collection as Record<string, unknown> | undefined;
+  const sustainability = data.sustainability_plan as Record<string, string> | undefined;
+
+  return (
+    <div className="structured-content">
+      {indicators && Object.entries(indicators).map(([level, items]) => (
+        <div key={level} className="me-indicator-group">
+          <h4 className="outcome-label">{level.charAt(0).toUpperCase() + level.slice(1)} Indicators</h4>
+          <div className="me-indicators">
+            {(items as Array<Record<string, unknown>>).map((ind, i) => (
+              <div key={i} className="me-indicator-card">
+                <div className="me-indicator-name">{ind.indicator as string}</div>
+                <div className="me-indicator-meta">
+                  <span>Baseline: {String(ind.baseline)}</span>
+                  <span>Target: {String(ind.target)}{ind.unit ? ` ${ind.unit}` : ""}</span>
+                  {ind.frequency && <span>Frequency: {ind.frequency as string}</span>}
+                </div>
+                {ind.data_source && <div className="me-indicator-source">Source: {ind.data_source as string}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {milestones && (
+        <div className="me-milestones">
+          <h4 className="outcome-label">Milestone Schedule</h4>
+          {Object.entries(milestones).map(([period, items]) => (
+            <div key={period} className="milestone-period">
+              <span className="milestone-period-label">{period}</span>
+              <ul className="outcome-list">
+                {items.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {collection && (
+        <div className="me-collection">
+          <h4 className="outcome-label">Data Collection</h4>
+          {Object.entries(collection).map(([type, items]) => {
+            if (typeof items === "string") {
+              return <p key={type} className="me-collection-note">{items}</p>;
+            }
+            if (!Array.isArray(items)) return null;
+            return (
+              <div key={type} className="outcome-group">
+                <h5 className="me-sub-label">{type.charAt(0).toUpperCase() + type.slice(1)}</h5>
+                <ul className="outcome-list">
+                  {items.map((item: string, i: number) => <li key={i}>{item}</li>)}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {sustainability && (
+        <div className="me-sustainability">
+          <h4 className="outcome-label">Sustainability Plan</h4>
+          {Object.entries(sustainability).map(([key, value]) => (
+            <div key={key} className="sustainability-item">
+              <span className="sustainability-label">{key.replace(/_/g, " ")}</span>
+              <p>{value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SmartSection({ content }: { content: string }) {
+  const parsed = tryParseJSON(content);
+
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+    const obj = parsed as Record<string, unknown>;
+    if (obj.direct_intended || obj.indirect_intended || obj.risks_unintended_negative) {
+      return <RenderOutcomes data={obj} />;
+    }
+    if (obj.indicators || obj.milestone_schedule || obj.data_collection) {
+      return <RenderMEFramework data={obj} />;
+    }
+  }
+
+  return <p>{content}</p>;
+}
+
 export default function ProjectReport({ project }: Props) {
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -57,13 +180,11 @@ export default function ProjectReport({ project }: Props) {
       </div>
 
       <div className="report-container" ref={reportRef}>
-        {/* Themed banner */}
         <div className={`report-banner ${theme.cls}`}>
           <div className="report-banner-pattern" />
           <span className="report-banner-icon">{theme.icon}</span>
         </div>
 
-        {/* Header */}
         <div className="report-header">
           <div className="report-brand">
             <div className="report-logo">HELPST<span style={{ color: "#1A52FF" }}>i</span>R</div>
@@ -74,7 +195,6 @@ export default function ProjectReport({ project }: Props) {
 
         <div className="report-divider" />
 
-        {/* Title block */}
         <div className="report-title-block">
           <h1 className="report-title">{project.title}</h1>
           <div className="report-meta-row">
@@ -95,12 +215,11 @@ export default function ProjectReport({ project }: Props) {
           </div>
         </div>
 
-        {/* Sections */}
         <div className="report-section">
           <div className="report-section-number">01</div>
           <div className="report-section-content">
             <h2>Problem Statement</h2>
-            <p>{project.problem_statement}</p>
+            <SmartSection content={project.problem_statement} />
           </div>
         </div>
 
@@ -108,7 +227,7 @@ export default function ProjectReport({ project }: Props) {
           <div className="report-section-number">02</div>
           <div className="report-section-content">
             <h2>Intervention Logic</h2>
-            <p>{project.intervention_logic}</p>
+            <SmartSection content={project.intervention_logic} />
           </div>
         </div>
 
@@ -116,7 +235,7 @@ export default function ProjectReport({ project }: Props) {
           <div className="report-section-number">03</div>
           <div className="report-section-content">
             <h2>Projected Outcomes</h2>
-            <p>{project.projected_outcomes}</p>
+            <SmartSection content={project.projected_outcomes} />
           </div>
         </div>
 
@@ -124,11 +243,10 @@ export default function ProjectReport({ project }: Props) {
           <div className="report-section-number">04</div>
           <div className="report-section-content">
             <h2>Monitoring & Evaluation Framework</h2>
-            <p>{project.me_framework}</p>
+            <SmartSection content={project.me_framework} />
           </div>
         </div>
 
-        {/* NGO Recommendations */}
         {project.recommendations.length > 0 && (
           <div className="report-section">
             <div className="report-section-number">05</div>
@@ -149,7 +267,6 @@ export default function ProjectReport({ project }: Props) {
           </div>
         )}
 
-        {/* Footer */}
         <div className="report-divider" />
         <div className="report-footer">
           <div className="report-footer-brand">HELPST<span style={{ color: "#1A52FF" }}>i</span>R</div>
@@ -200,6 +317,27 @@ const PRINT_STYLES = `
   .report-section-content { flex: 1; }
   .report-section-content h2 { font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #1A52FF; margin-bottom: 10px; }
   .report-section-content p { font-size: 14px; line-height: 1.8; white-space: pre-line; }
+  .structured-content { font-size: 14px; line-height: 1.8; }
+  .outcome-group { margin-bottom: 16px; }
+  .outcome-label { font-size: 13px; font-weight: 600; color: #1e40af; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .outcome-list { margin: 0; padding-left: 20px; }
+  .outcome-list li { margin-bottom: 8px; font-size: 13px; line-height: 1.7; }
+  .me-indicator-group { margin-bottom: 20px; }
+  .me-indicators { display: flex; flex-direction: column; gap: 10px; }
+  .me-indicator-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; }
+  .me-indicator-name { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .me-indicator-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #6b7280; }
+  .me-indicator-source { font-size: 11px; color: #9ca3af; margin-top: 4px; }
+  .me-milestones { margin-bottom: 20px; }
+  .milestone-period { margin-bottom: 12px; }
+  .milestone-period-label { font-weight: 600; font-size: 13px; color: #1A52FF; display: inline-block; margin-bottom: 4px; }
+  .me-collection { margin-bottom: 20px; }
+  .me-collection-note { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+  .me-sub-label { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; text-transform: capitalize; }
+  .me-sustainability { margin-bottom: 20px; }
+  .sustainability-item { margin-bottom: 12px; }
+  .sustainability-label { font-weight: 600; font-size: 13px; color: #1A52FF; text-transform: capitalize; display: block; margin-bottom: 4px; }
+  .sustainability-item p { font-size: 13px; line-height: 1.7; }
   .report-ngo-list { display: flex; flex-direction: column; gap: 16px; margin-top: 12px; }
   .report-ngo-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
   .report-ngo-header { display: flex; justify-content: space-between; margin-bottom: 8px; }

@@ -288,6 +288,29 @@ button.active { background: var(--primary); color: white; }
 .report-section-content h2 { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--primary); margin-bottom: 0.75rem; }
 .report-section-content p { font-size: 0.9rem; line-height: 1.8; white-space: pre-line; color: var(--text); }
 
+/* Structured report content */
+.structured-content { font-size: 0.9rem; line-height: 1.8; }
+.outcome-group { margin-bottom: 1.25rem; }
+.outcome-label { font-size: 0.8rem; font-weight: 600; color: #1e40af; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.03em; }
+.outcome-list { margin: 0; padding-left: 1.25rem; }
+.outcome-list li { margin-bottom: 0.5rem; font-size: 0.85rem; line-height: 1.7; }
+.me-indicator-group { margin-bottom: 1.25rem; }
+.me-indicators { display: flex; flex-direction: column; gap: 0.6rem; }
+.me-indicator-card { border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.me-indicator-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; }
+.me-indicator-meta { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--text-secondary); }
+.me-indicator-source { font-size: 0.7rem; color: #9ca3af; margin-top: 0.25rem; }
+.me-milestones { margin-bottom: 1.25rem; }
+.milestone-period { margin-bottom: 0.75rem; }
+.milestone-period-label { font-weight: 600; font-size: 0.85rem; color: var(--primary); display: inline-block; margin-bottom: 0.25rem; }
+.me-collection { margin-bottom: 1.25rem; }
+.me-collection-note { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.me-sub-label { font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; text-transform: capitalize; }
+.me-sustainability { margin-bottom: 1.25rem; }
+.sustainability-item { margin-bottom: 0.75rem; }
+.sustainability-label { font-weight: 600; font-size: 0.85rem; color: var(--primary); text-transform: capitalize; display: block; margin-bottom: 0.25rem; }
+.sustainability-item p { font-size: 0.85rem; line-height: 1.7; }
+
 .report-ngo-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.75rem; }
 .report-ngo-card { border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
 .report-ngo-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }

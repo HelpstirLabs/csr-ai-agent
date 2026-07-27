@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:8088/auth/verifytoken",
+                "https://api-csr-ai-agent.onrender.com/auth/verifytoken",
                 { withCredentials: true }
             );
             console.log(response)
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (phone) => {
         try {
             const response = await axios.post(
-                'http://localhost:8088/auth/login',
+                'https://api-csr-ai-agent.onrender.com/auth/login',
                 { phone },
                 { withCredentials: true }
             );
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     const loginOTPVerification = async (userId, otp) => {
       try {
 
-        const response = await axios.post('http://localhost:8088/auth/verify-login-otp', { user_id: userId, otp }, { withCredentials: true });
+        const response = await axios.post('https://api-csr-ai-agent.onrender.com/auth/verify-login-otp', { user_id: userId, otp }, { withCredentials: true });
     
         const data = await response.data;
         console.log(data)
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            const response = await axios.post('http://localhost:8088/auth/logout', {}, { withCredentials: true });
+            const response = await axios.post('https://api-csr-ai-agent.onrender.com/auth/logout', {}, { withCredentials: true });
             if (response.status === 200) {
             setIsAuthenticated(false);
             setUser(null);

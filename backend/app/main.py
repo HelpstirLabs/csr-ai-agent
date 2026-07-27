@@ -14,7 +14,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:4173",
+        "https://api-csr-ai-agent.onrender.com",
+        "https://csr-ai-agent-57dc.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],

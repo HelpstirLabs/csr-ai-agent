@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8088";
+const API_BASE_URL = "https://api-csr-ai-agent.onrender.com";
 
 export const getCSRMandate = async (userId) => {
   try {

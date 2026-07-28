@@ -29,7 +29,7 @@ export default function AboutYou({ nextPage }) {
         setFormData({
           name: response.user.name || "",
           email: response.user.email || "",
-          phone: response.user.phone || "",
+          phone: response.user.phone_number || "",
           company_name: response.user.company_name || "",
           designation: response.user.designation || "",
           linkedin: response.user.linkedin || "",

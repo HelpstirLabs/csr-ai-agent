@@ -423,7 +423,7 @@ async def verify_login_otp(
             value=token,
             httponly=True,
             secure=True,
-            samesite="lax",
+            samesite="none",
             max_age=60 * 60 * 24 * 7,
             path="/"
         )

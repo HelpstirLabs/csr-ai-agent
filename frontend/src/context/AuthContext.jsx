@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
             setUserId(data.user.user_id);
             setFirstLogin(data.is_first_login);
             setProfileStrength(data.user.profile_strength)
-            // checkAuth();
+            checkAuth();
         }
     
         return {

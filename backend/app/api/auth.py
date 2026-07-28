@@ -467,32 +467,51 @@ async def verify_token(
     db: AsyncSession = Depends(get_db)
 ):
     try:
+        print("========== VERIFY TOKEN START ==========")
+
         # Step 1: Check cookies
+        print("All Cookies:", request.cookies)
 
         token = request.cookies.get("access_token")
 
+        print("Access Token:", token)
+
         if not token:
+            print("NO ACCESS TOKEN FOUND")
 
             raise HTTPException(
                 status_code=401,
                 detail="Not authenticated"
             )
 
+        print("TOKEN FOUND")
+
         # Step 2: Decode token
+
+        print("SECRET KEY EXISTS:", bool(settings.SECRET_KEY))
+        print("ALGORITHM:", settings.ALGORITHM)
 
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
+
+        print("JWT PAYLOAD:", payload)
+
         user_id = payload.get("user_id")
 
+        print("USER ID FROM TOKEN:", user_id)
+
         if not user_id:
+            print("USER ID MISSING IN TOKEN")
 
             raise HTTPException(
                 status_code=401,
                 detail="Invalid token"
             )
+
+        print("USER ID FOUND")
 
         # Step 3: Fetch user
 
@@ -502,14 +521,23 @@ async def verify_token(
             )
         )
 
+        print("DATABASE QUERY DONE")
+
         user = result.scalar_one_or_none()
 
+        print("USER FROM DATABASE:", user)
+
         if not user:
+            print("USER DOES NOT EXIST")
 
             raise HTTPException(
                 status_code=401,
                 detail="User not found"
             )
+
+        print("USER VERIFIED")
+
+        print("========== VERIFY TOKEN SUCCESS ==========")
 
         return {
             "token": True,
@@ -522,20 +550,34 @@ async def verify_token(
             "profile_strength": user.profile_strength
         }
 
+
     except JWTError as e:
+
+        print("JWT ERROR:")
+        print(type(e).__name__)
+        print(str(e))
 
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
         )
 
+
+    except HTTPException:
+        raise
+
+
     except Exception as e:
+
+        print("GENERAL ERROR:")
+        print(type(e).__name__)
+        print(str(e))
 
         raise HTTPException(
             status_code=401,
             detail=str(e)
         )
-    
+
     
 @router.post("/logout")
 async def logout(

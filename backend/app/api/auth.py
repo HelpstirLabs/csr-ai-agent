@@ -15,6 +15,8 @@ from app.services.twilio_service import (
 )
 from app.core.config import settings
 from app.middleware.auth import auth_middleware
+from datetime import datetime, timedelta
+import secrets
 
 router = APIRouter(
     prefix="/auth",
@@ -46,13 +48,20 @@ async def register(
         if not phone.startswith("+"):
             phone = f"+91{phone}"
 
+        # Generate secure 6-digit OTP
+        otp = str(secrets.randbelow(900000) + 100000)
+
         user = User(
             name=data.name,
             email=data.email,
             phone_number=phone,
             company_name=data.company_name,
-            otp_sent=False,
-            otp_verified=False
+
+            otp=otp,
+            otp_sent=True,
+            otp_verified=False,
+            otp_attempts=0,
+            otp_expires_at=datetime.utcnow() + timedelta(minutes=5)
         )
 
         db.add(user)
@@ -60,15 +69,11 @@ async def register(
         await db.commit()
         await db.refresh(user)
 
-        # Send OTP
-        await send_phone_otp(phone)
-
-        # Update OTP status
-        user.otp_sent = True
-        user.otp_verified = False
-
-        await db.commit()
-        await db.refresh(user)
+        # Send SMS
+        await send_phone_otp(
+            phone=phone,
+            otp=otp
+        )
 
         return {
             "success": True,
@@ -87,6 +92,7 @@ async def register(
             status_code=500,
             detail=str(e)
         )
+        
 
 @router.post("/verify-otp")
 async def verify_otp(
@@ -106,24 +112,50 @@ async def verify_otp(
                 detail="User not found"
             )
 
-        is_valid = await verify_phone_otp(
-            user.phone_number,
-            payload.otp
+        # Check if OTP exists
+        if not user.otp:
+            raise HTTPException(
+                status_code=400,
+                detail="No OTP found. Please request a new OTP."
+            )
+
+        # Check expiry
+        if (
+            user.otp_expires_at is None or
+            user.otp_expires_at < datetime.utcnow()
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="OTP has expired. Please request a new OTP."
+            )
+
+        if user.otp_attempts >= 5:
+            raise HTTPException(
+                status_code=400,
+                detail="Maximum OTP attempts exceeded. Please request a new OTP."
         )
 
-        if not is_valid:
+        # Check OTP
+        if user.otp != payload.otp:
+            user.otp_attempts += 1
+            await db.commit()
+
             raise HTTPException(
                 status_code=400,
                 detail="Invalid OTP"
             )
 
         # OTP verified successfully
+        user.otp = None
         user.otp_sent = False
         user.otp_verified = True
+        user.otp_attempts = 0
+        user.otp_expires_at = None
 
         await db.commit()
         await db.refresh(user)
 
+        # Optional success SMS
         try:
             await send_verification_success_sms(
                 user.phone_number
@@ -165,20 +197,28 @@ async def resend_otp(
                 status_code=404,
                 detail="User not found"
             )
+        # Generate new secure 6-digit OTP
+        otp = str(secrets.randbelow(900000) + 100000)
 
-        # Send a new OTP
-        await send_phone_otp(user.phone_number)
-
-        # Update OTP status
+        # Update OTP details
+        user.otp = otp
         user.otp_sent = True
         user.otp_verified = False
+        user.otp_attempts = 0
+        user.otp_expires_at = datetime.utcnow() + timedelta(minutes=5)
 
         await db.commit()
         await db.refresh(user)
 
+        # Send the new OTP
+        await send_phone_otp(
+            phone=user.phone_number,
+            otp=otp
+        )
+
         return {
             "success": True,
-            "message": "OTP resent successfully",
+            "message": "OTP resent successfully"
         }
 
     except HTTPException:
@@ -191,7 +231,7 @@ async def resend_otp(
             status_code=500,
             detail=str(e)
         )
-    
+
 @router.post("/login")
 async def login(
     payload: LoginSchema,
@@ -220,15 +260,24 @@ async def login(
                 detail="User not found"
             )
 
-        # Send OTP
-        await send_phone_otp(user.phone_number)
+        # Generate secure 6-digit OTP
+        otp = str(secrets.randbelow(900000) + 100000)
 
-        # Update status
+        # Store OTP details
+        user.otp = otp
         user.otp_sent = True
         user.otp_verified = False
+        user.otp_attempts = 0
+        user.otp_expires_at = datetime.utcnow() + timedelta(minutes=5)
 
         await db.commit()
         await db.refresh(user)
+
+        # Send OTP SMS
+        await send_phone_otp(
+            phone=user.phone_number,
+            otp=otp
+        )
 
         return {
             "success": True,
@@ -247,7 +296,8 @@ async def login(
             status_code=500,
             detail=str(e)
         )
-    
+
+
 @router.post("/verify-login-otp")
 async def verify_login_otp(
     payload: VerifyOtpSchema,
@@ -255,72 +305,138 @@ async def verify_login_otp(
     db: AsyncSession = Depends(get_db)
 ):
     try:
+        print("========== VERIFY LOGIN OTP START ==========")
+
+        print("Payload user_id:", payload.user_id)
+        print("Payload OTP:", payload.otp)
+
         result = await db.execute(
             select(User).where(
                 User.id == payload.user_id
             )
         )
 
+        print("Database query executed")
+
         user = result.scalar_one_or_none()
 
+        print("User result:", user)
+
         if not user:
+            print("USER NOT FOUND FOR ID:", payload.user_id)
+
             raise HTTPException(
                 status_code=404,
                 detail="User not found"
             )
 
-        is_valid = await verify_phone_otp(
-            user.phone_number,
-            payload.otp
-        )
+        print("User found")
+        print("User ID:", user.id)
+        print("Phone:", user.phone_number)
+        print("Stored OTP:", user.otp)
+        print("OTP Expiry:", user.otp_expires_at)
+        print("OTP Attempts:", user.otp_attempts)
 
-        if not is_valid:
+        # Check OTP exists
+        if not user.otp:
+            print("OTP DOES NOT EXIST")
+
+            raise HTTPException(
+                status_code=400,
+                detail="OTP not found. Please request a new OTP."
+            )
+
+        print("OTP exists")
+
+        # Check expiry
+        if (
+            user.otp_expires_at is None or
+            user.otp_expires_at < datetime.utcnow()
+        ):
+            print("OTP EXPIRED")
+
+            raise HTTPException(
+                status_code=400,
+                detail="OTP expired. Please request a new OTP."
+            )
+
+        print("OTP not expired")
+
+        # Check attempts
+        if user.otp_attempts >= 5:
+            print("MAX OTP ATTEMPTS REACHED")
+
+            raise HTTPException(
+                status_code=400,
+                detail="Too many failed attempts"
+            )
+
+        print("OTP attempts OK")
+
+        # Verify OTP
+        if user.otp != payload.otp:
+
+            print(
+                "INVALID OTP",
+                "Expected:",
+                user.otp,
+                "Received:",
+                payload.otp
+            )
+
+            user.otp_attempts += 1
+
+            await db.commit()
+
             raise HTTPException(
                 status_code=400,
                 detail="Invalid OTP"
             )
 
-        # Generate JWT Token
+        print("OTP VERIFIED SUCCESSFULLY")
+
         token = create_access_token(
             user_id=user.id,
             email=user.email
         )
 
-        # First login check
+        print("JWT CREATED")
+
         is_first_login = user.login_count == 0
 
-        # Update user
+        print("First login:", is_first_login)
+
+        user.otp = None
         user.otp_sent = False
         user.otp_verified = True
+        user.otp_expires_at = None
+        user.otp_attempts = 0
         user.login_count += 1
         user.access_token = token
 
         await db.commit()
-        await db.refresh(user)
 
-        # Set JWT Cookie
+        print("USER UPDATED")
+
         response.set_cookie(
             key="access_token",
             value=token,
             httponly=True,
-            secure=False,  # True in production
+            secure=False,
             samesite="lax",
             max_age=60 * 60 * 24 * 7,
             path="/"
         )
 
-        try:
-            await send_verification_success_sms(
-                user.phone_number
-            )
-        except Exception:
-            pass
+        print("COOKIE SET")
+
+        print("========== VERIFY LOGIN OTP END ==========")
 
         return {
             "success": True,
             "message": "Login successful",
             "token": token,
-            "is_first_login": user.login_count,
+            "is_first_login": is_first_login,
             "user": {
                 "user_id": user.id,
                 "name": user.name,
@@ -328,7 +444,6 @@ async def verify_login_otp(
                 "company_name": user.company_name,
                 "phone": user.phone_number,
                 "profile_strength": user.profile_strength,
-
             }
         }
 
@@ -336,12 +451,15 @@ async def verify_login_otp(
         raise
 
     except Exception as e:
+        print("ERROR:", str(e))
+
         await db.rollback()
 
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
+    
     
 @router.get("/verifytoken")
 async def verify_token(

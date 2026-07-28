@@ -6,38 +6,43 @@ client = Client(
     settings.TWILIO_AUTH_TOKEN
 )
 
-VERIFY_SERVICE_SID = settings.TWILIO_VERIFY_SERVICE_SID
 
+async def send_phone_otp(phone: str, otp: str):
+    try:
+        print(settings.TWILIO_ACCOUNT_SID)
+        print(settings.TWILIO_AUTH_TOKEN[:6])
+        print(settings.TWILIO_PHONE_NUMBER)
+        print("OTP:", otp)
+        message = client.messages.create(
+            body=f"Your HelpStir verification code is {otp}. It is valid for 5 minutes.",
+            from_=settings.TWILIO_PHONE_NUMBER,
+            to=phone
+        )
 
-async def send_phone_otp(phone: str):
-    print("SEND SID:", VERIFY_SERVICE_SID)
+        return message.sid
 
-    verification = client.verify.v2.services(
-        VERIFY_SERVICE_SID
-    ).verifications.create(
-        to=phone,
-        channel="sms"
-    )
-
-    print("Verification SID:", verification.sid)
-    return verification
+    except Exception as e:
+        print("TWILIO ERROR")
+        print(type(e).__name__)
+        print(str(e))
+        raise
 
 
 async def verify_phone_otp(phone: str, otp: str):
     try:
-        print("VERIFY SID:", VERIFY_SERVICE_SID)
+        #print("VERIFY SID:", VERIFY_SERVICE_SID)
         print("PHONE:", phone)
         print("OTP:", otp)
 
-        verification_check = client.verify.v2.services(
-            VERIFY_SERVICE_SID
-        ).verification_checks.create(
-            to=phone,
-            code=otp
-        )
+        #verification_check = client.verify.v2.services(
+         #   VERIFY_SERVICE_SID
+        #).verification_checks.create(
+        #    to=phone,
+          #  code=otp
+       # )
 
-        print("Verification SID:", verification_check.sid)
-        print("Status:", verification_check.status)
+        #print("Verification SID:", verification_check.sid)
+        #rint("Status:", verification_check.status)
 
         return verification_check.status == "approved"
 

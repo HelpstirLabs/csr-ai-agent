@@ -9,7 +9,6 @@ class Settings(BaseSettings):
 
     TWILIO_ACCOUNT_SID: str
     TWILIO_AUTH_TOKEN: str
-    TWILIO_VERIFY_SERVICE_SID: str
     TWILIO_PHONE_NUMBER: str
     ANTHROPIC_API_KEY:str
 

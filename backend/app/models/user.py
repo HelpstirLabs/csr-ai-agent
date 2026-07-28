@@ -1,7 +1,7 @@
 import random
 import string
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, DateTime
 
 from app.core.database import Base
 
@@ -31,10 +31,14 @@ class User(Base):
     company_name = Column(String(255))
 
     # OTP & Authentication
+    otp = Column(String(6), nullable=True)
     otp_sent = Column(Boolean, default=False)
     otp_verified = Column(Boolean, default=False)
+    otp_expires_at = Column(DateTime, nullable=True)
+    otp_attempts = Column(Integer, default=0)
     access_token = Column(String(1000), nullable=True)
     login_count = Column(Integer, default=0)
+
 
     # Profile Information
     designation = Column(String(255), nullable=True)

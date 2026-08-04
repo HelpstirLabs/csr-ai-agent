@@ -20,10 +20,10 @@ function App() {
       <ScrollToTop />
 
       <Routes>
-        <Route path="/csr/register" element={<Register />} />
-        <Route path="/csr" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Login />} />
         <Route
-          path="/csr/welcome"
+          path="/welcome"
           element={
             <PrivateRoute>
               <Welcome />
@@ -31,7 +31,7 @@ function App() {
           }
         />
         <Route
-          path="/csr/design"
+          path="/design"
           element={
             <PrivateRoute>
               <DesignProject />
@@ -47,7 +47,7 @@ function App() {
           }
         /> */}
         <Route
-          path="/csr/rfptracker"
+          path="/rfptracker"
           element={
             <PrivateRoute>
               <RFP />
@@ -55,7 +55,7 @@ function App() {
           }
         />
         <Route
-          path="/csr/profile"
+          path="/profile"
           element={
             <PrivateRoute>
               <Profile />

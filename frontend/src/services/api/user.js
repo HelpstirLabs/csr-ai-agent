@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api-csr-ai-agent.onrender.com";
+const API_BASE_URL = "https://helpstir.in/csr-api";
 
 export const userRegister = async (formData) => {
   try {

@@ -14,8 +14,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://api-csr-ai-agent.onrender.com",
-        "https://csr-ai-agent-57dc.onrender.com"
+        "https://https://helpstir.in/csr-api/",
+        "https://https://helpstir.in/csr/"
     ],
     allow_credentials=True,
     allow_methods=["*"],

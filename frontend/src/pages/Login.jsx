@@ -39,10 +39,8 @@ export default function Login() {
 
         try {
             setLoading(true);
-            console.log("Submitting phone number:", phone);
 
             const response = await authLogin(phone);
-            console.log("Login response:", response);
 
             if (response.status === 200 ||
                 response.status === 201 ||
@@ -84,16 +82,12 @@ export default function Login() {
                 otp
             );
 
-            console.log("otp", response)
-
             if (response.data.token) {
                 toast.success("OTP verified successfully", {
                     position: "top-right",
                     autoClose: 2500,
                     pauseOnHover: false,
                 });
-
-                console.log(firstLogin)
 
 
                 if (firstLogin === 0) {
@@ -104,7 +98,7 @@ export default function Login() {
             }
         } catch (error) {
             console.error(error);
-
+            toast.error("Failed to verify OTP");
         }
     };
 
@@ -227,9 +221,8 @@ export default function Login() {
                         <p className="text-white/80 md:text-gray-500 text-sm">
                             New to HELPSTIR?{" "}
                             <button
-                                onClick={() => (window.location.href = "/register")}
-                                className="font-semibold text-white md:text-blue-600 hover:underline"
-                            >
+                                onClick={() => navigate("/register")}
+                                className="font-semibold text-white md:text-blue-600 hover:underline">
                                 Create account
                             </button>
                         </p>
@@ -245,7 +238,6 @@ export default function Login() {
                     </p>
                     {!showOtpScreen ? (
                         <>
-                            {/* Mobile Number */}
                             <div className="mb-4">
                                 <label className="block text-[11px] font-semibold uppercase tracking-wide text-white md:text-gray-700 mb-3">
                                     Mobile Number
@@ -275,8 +267,6 @@ export default function Login() {
                         </>
                     ) : (
                         <div className="space-y-5">
-
-                            {/* OTP */}
                             <div>
                                 <label className="block text-[11px] font-semibold uppercase text-white md:text-gray-700 mb-3">
                                     Enter OTP
@@ -316,7 +306,6 @@ export default function Login() {
                         </div>
                     )}
 
-                    {/* Security Badge */}
                     <div className="mt-12 flex justify-center md:justify-start">
                         <div className="px-5 py-2 rounded-full bg-white/10 md:bg-[#F7F7F9] backdrop-blur-sm text-white/80 md:text-gray-500 text-xs">
                             🔒 256-bit encryption · ISO 27001

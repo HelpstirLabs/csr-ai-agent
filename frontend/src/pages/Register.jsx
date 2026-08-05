@@ -8,7 +8,7 @@ import {
   validatePassword,
 } from "../utils/validation";
 import { Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -235,9 +235,9 @@ export default function Register() {
 
             <div>
               Already have an account?{" "}
-              <a href="/" className="text-blue-600 font-medium">
+              <Link to="/" className="font-medium text-blue-600">
                 Sign in
-              </a>
+              </Link>
             </div>
           </div>
 

@@ -44,7 +44,7 @@ async def generate_project(payload: ProjectGenerateRequest):
         # ----------------------------------
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.get(
-                "http://127.0.0.1:8000/api/v1/project-generator/need_capture",
+                "http://127.0.0.1:8088/api/v1/project-generator/need_capture",
                 params={
                     "geography": payload.geography,
                 }
@@ -105,7 +105,7 @@ async def generate_project(payload: ProjectGenerateRequest):
         # ----------------------------------
         async with httpx.AsyncClient(timeout=60.0) as client:
             org_response = await client.post(
-                "http://127.0.0.1:8000/api/v1/project-generator/by-ids",
+                "http://127.0.0.1:8088/api/v1/project-generator/by-ids",
                 json={
                     "org_ids": selected_org_ids
                 }

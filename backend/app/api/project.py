@@ -38,7 +38,7 @@ async def generate_project(
         # ============================================================
 
         ngo_url = (
-            "http://127.0.0.1:8000"
+            "http://127.0.0.1:8088"
             "/api/v1/project-generator/need_capture"
         )
 
@@ -131,7 +131,7 @@ async def generate_project(
         # ============================================================
 
         org_url = (
-            "http://127.0.0.1:8000"
+            "http://127.0.0.1:8088"
             "/api/v1/project-generator/by-ids"
         )
 

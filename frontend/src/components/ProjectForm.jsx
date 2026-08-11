@@ -104,7 +104,7 @@ export default function ProjectForm() {
             console.log(response);
 
             setGeneratedProject(response.rfp);
-            setNGOList(response.recommended_ngos)
+            setNGOList(response.ngo_details)
             console.log("Generated Project:", generatedProject);
             console.log(typeof generatedProject);
 
@@ -446,16 +446,24 @@ export default function ProjectForm() {
 
                                 <div className="flex flex-wrap gap-2">
                                     {[
-                                        "Healthcare Access",
-                                        "Malnutrition",
-                                        "Maternal Health",
-                                        "Child Health",
-                                        "Education Gap",
-                                        "Skill Development",
+                                        "Education",
+                                        "Healthcare",
+                                        "Livelihood",
+                                        "Environment",
                                         "Women Empowerment",
-                                        "Disability Inclusion",
-                                        "Water & Sanitation",
-                                        "Livelihood Opportunities"
+                                        "Child Development",
+                                        "Rural Development",
+                                        "WASH (Water, Sanitation)",
+                                        "Agriculture",
+                                        "Digital Literacy",
+                                        "Mental Health",
+                                        "Skill Development",
+                                        "Disability",
+                                        "Elderly Care",
+                                        "Nutrition",
+                                        "Legal Aid",
+                                        "Disaster Relief",
+                                        "Housing",
                                     ].map((item) => (
                                         <Chip
                                             key={item}

@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function ProfileNavbar() {
@@ -11,10 +11,21 @@ export default function ProfileNavbar() {
         <header className="fixed top-0 left-0 w-full z-50 bg-white border-b flex items-center justify-between px-8 py-3">
             {/* Logo */}
             <div>
-                <h1 onClick={() => navigate('/design')} className="font-heading cursor-pointer text-[20px] font-extrabold tracking-[-0.01em] leading-none">
-                    <span className="text-blue-600">HELP</span>
-                    <span className="text-black">STiR</span>
-                </h1>
+                <Link
+                    to="/design"
+                    className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-90 sm:gap-3">
+                    <img
+                        src="/logo.svg"
+                        alt="HELPSTiR Logo"
+                        className="h-9 w-auto sm:h-12"
+                    />
+
+                    <img
+                        src="/helpstir-image.png"
+                        alt="HELPSTiR"
+                        className="h-3.5 w-auto sm:h-5"
+                    />
+                </Link>
             </div>
 
             {/* Right Side */}
@@ -28,7 +39,7 @@ export default function ProfileNavbar() {
                         Skip and explore →
                     </button>
                 )}
-                
+
 
                 <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
                     RK

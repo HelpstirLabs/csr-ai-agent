@@ -49,9 +49,9 @@ export default function DesignProject() {
             The AI designs the full project from NGO network data.
           </p>
 
-          <div className="mt-8">
+          {/* <div className="mt-8">
             <ProjectFlow />
-          </div>
+          </div> */}
 
           <div className="mt-8">
             <ProjectForm />

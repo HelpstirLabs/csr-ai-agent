@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Play, X, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { fetchNGOsData, handleProjectDesign } from "../services/api/project";
+import { fetchNGOsData, handleProjectDesign, sendRFP } from "../services/api/project";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
 
@@ -29,12 +29,18 @@ export default function ProjectForm() {
     const [generatedProject, setGeneratedProject] = useState(null);
     const [ngoList, setNGOList] = useState([])
     const [loading, setLoading] = useState(false);
+    const [selectedNgo, setSelectedNgo] = useState(null);
+    const [isSendingRFP, setIsSendingRFP] = useState(false);
+
+    const [projectId, setProjectId] = useState(null)
+
 
     const [formData, setFormData] = useState({
         vision: "",
         gender: "",
         geography: "",
         budget: "",
+        duration:"",
         beneficiary: "",
         area: "",
         scale: "",
@@ -47,7 +53,7 @@ export default function ProjectForm() {
         password: "",
     });
 
-    // textarea onchange
+
     const handleVisionChange = (e) => {
         setFormData({
             ...formData,
@@ -55,7 +61,7 @@ export default function ProjectForm() {
         });
     };
 
-    // chip onchange
+
     const handleSelect = (field, value) => {
         setFormData({
             ...formData,
@@ -78,6 +84,7 @@ export default function ProjectForm() {
             gender,
             geography,
             budget,
+            duration,
             beneficiary,
             area,
             scale,
@@ -88,6 +95,7 @@ export default function ProjectForm() {
             !gender ||
             !geography ||
             !budget ||
+            !duration ||
             !beneficiary ||
             !area ||
             !scale
@@ -101,12 +109,9 @@ export default function ProjectForm() {
 
             const response = await handleProjectDesign(formData);
 
-            console.log(response);
-
-            setGeneratedProject(response.rfp);
-            setNGOList(response.ngo_details)
-            console.log("Generated Project:", generatedProject);
-            console.log(typeof generatedProject);
+            setGeneratedProject(response);
+            setProjectId(response.project_id)
+            setNGOList(response.ngo_details || []);
 
             toast.success("Project generated successfully");
         } catch (error) {
@@ -119,85 +124,128 @@ export default function ProjectForm() {
 
 
 
-    const extractSection = (text, start, end) => {
+    const extractSection = (
+        text,
+        startMarker,
+        endMarker = null
+    ) => {
         if (!text || typeof text !== "string") {
             return "";
         }
 
-        const startIndex = text.indexOf(start);
+        const normalizedText = text
+            .replace(/\r\n/g, "\n")
+            .replace(/\r/g, "\n")
+            .trim();
+
+        const startIndex = normalizedText
+            .toLowerCase()
+            .indexOf(
+                startMarker.toLowerCase()
+            );
 
         if (startIndex === -1) {
+            console.warn(
+                `Section not found: ${startMarker}`
+            );
+
             return "";
         }
 
-        const endIndex = end
-            ? text.indexOf(end, startIndex)
-            : text.length;
+        const contentStart =
+            startIndex + startMarker.length;
 
-        return text.substring(
-            startIndex + start.length,
-            endIndex === -1 ? text.length : endIndex
-        ).trim();
+        let contentEnd =
+            normalizedText.length;
+
+        if (endMarker) {
+            const endIndex = normalizedText
+                .toLowerCase()
+                .indexOf(
+                    endMarker.toLowerCase(),
+                    contentStart
+                );
+
+            if (endIndex !== -1) {
+                contentEnd = endIndex;
+            }
+        }
+
+        return normalizedText
+            .substring(
+                contentStart,
+                contentEnd
+            )
+            .trim();
     };
 
-    const projectTitle = extractSection(
-        generatedProject,
-        "Project Title:",
-        "Submitted by:"
-    );
+    const proposalText =
+        generatedProject?.proposal || "";
+
+    const projectTitle =
+        generatedProject?.project_title ||
+        "CSR Project Proposal";
+
 
     const executiveSummary = extractSection(
-        generatedProject,
+        proposalText,
         "EXECUTIVE SUMMARY",
         "PROBLEM STATEMENT"
     );
 
+
     const problemStatement = extractSection(
-        generatedProject,
+        proposalText,
         "PROBLEM STATEMENT",
         "PROJECT OBJECTIVES"
     );
 
+
     const objectives = extractSection(
-        generatedProject,
+        proposalText,
         "PROJECT OBJECTIVES",
         "TARGET BENEFICIARIES"
     );
 
+
     const targetBeneficiaries = extractSection(
-        generatedProject,
+        proposalText,
         "TARGET BENEFICIARIES",
         "PROJECT APPROACH"
     );
 
+
     const projectApproach = extractSection(
-        generatedProject,
+        proposalText,
         "PROJECT APPROACH",
         "EXPECTED OUTCOMES"
     );
 
+
     const expectedOutcomes = extractSection(
-        generatedProject,
+        proposalText,
         "EXPECTED OUTCOMES",
         "IMPLEMENTATION TIMELINE"
     );
 
+
     const implementationTimeline = extractSection(
-        generatedProject,
+        proposalText,
         "IMPLEMENTATION TIMELINE",
         "ESTIMATED BUDGET SUMMARY"
     );
 
+
     const budgetSummary = extractSection(
-        generatedProject,
+        proposalText,
         "ESTIMATED BUDGET SUMMARY",
         "CONCLUSION"
     );
 
+
     const conclusion = extractSection(
-        generatedProject,
-        "CONCLUSION",
-        null
+        proposalText,
+        "CONCLUSION"
     );
 
     const downloadProposalPDF = () => {
@@ -247,40 +295,59 @@ export default function ProjectForm() {
         doc.save(`${projectTitle || "proposal"}.pdf`);
     };
 
+    const handleSendRFP = async () => {
+        if (!selectedNgo) {
+            toast.error("Please select an NGO first.");
+            return;
+        }
+
+        if (!selectedNgo.contact_email) {
+            toast.error("Selected NGO does not have a contact email.");
+            return;
+        }
+
+        setIsSendingRFP(true);
+
+        try {
+            const response = await sendRFP(projectId, selectedNgo.org_id);
+
+            if (!response.success) {
+                throw new Error(response.detail.message || "Failed to send RFP");
+            }
+
+            toast.success("RFP sent successfully to the NGO.");
+
+        } catch (error) {
+            console.error("Send RFP error:", error);
+            toast.error(error.message || "Failed to send RFP.");
+
+        } finally {
+            setIsSendingRFP(false);
+        }
+    };
+
+
+
     return (
         <div className="w-full min-h-screen ">
             <div className="w-full">
-                {/* Header */}
 
-
-                {/* Main Form */}
                 <div className="mt-5 bg-[#F8F8FC] border border-gray-200 rounded-[24px] p-5">
-                    {/* Tabs */}
+
                     <div className="bg-[#ECECF6] rounded-xl p-1 flex items-center">
                         <button
                             onClick={() => setActiveTab("vision")}
                             className={`flex-1 font-medium rounded-lg py-1.5 text-[12px] transition-all ${activeTab === "vision"
                                 ? "bg-white border border-[#C7D2FE] text-blue-600 shadow-sm"
                                 : "text-gray-500"
-                                }`}
-                        >
+                                }`}>
                             Write your vision
                         </button>
-
-                        {/* <button
-                            onClick={() => setActiveTab("builder")}
-                            className={`flex-1 font-medium rounded-lg py-1.5 text-[12px] transition-all ${activeTab === "builder"
-                                ? "bg-white border border-[#C7D2FE] text-blue-600 shadow-sm"
-                                : "text-gray-500"
-                                }`}
-                        >
-                            Step-by-step builder
-                        </button> */}
                     </div>
 
                     {activeTab === "vision" && (
                         <div>
-                            {/* Textarea */}
+
                             <div className="mt-6">
                                 <label className="block text-xs font-semibold tracking-wide text-gray-700 mb-2 uppercase">
                                     Describe what you want to achieve
@@ -295,7 +362,6 @@ export default function ProjectForm() {
                                 />
                             </div>
 
-                            {/* Gender Focus */}
                             <div className="mt-6">
                                 <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                     Gender Focus
@@ -326,10 +392,8 @@ export default function ProjectForm() {
                                 </div>
                             </div>
 
-                            {/* Geography */}
-                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                                {/* Geography */}
+                            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                         Geography
@@ -381,7 +445,6 @@ export default function ProjectForm() {
                                     </select>
                                 </div>
 
-                                {/* Budget */}
                                 <div>
                                     <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                         Budget Range
@@ -411,9 +474,34 @@ export default function ProjectForm() {
                                     </select>
                                 </div>
 
+                                <div>
+                                    <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
+                                        Duration
+                                    </h3>
+
+                                    <select
+                                        value={formData.duration}
+                                        onChange={(e) =>
+                                            handleSelect("duration", e.target.value)
+                                        }
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select Duration</option>
+
+                                        {[
+                                            "6 months",
+                                            "12 months",
+                                            "18 months",
+                                            "24 months",
+                                        ].map((duration) => (
+                                            <option key={duration} value={duration}>
+                                                {duration}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
-                            {/* Beneficiary */}
                             <div className="mt-6">
                                 <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                     Beneficiary Type
@@ -438,7 +526,6 @@ export default function ProjectForm() {
                                 </div>
                             </div>
 
-                            {/* focus area */}
                             <div className="mt-6">
                                 <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                     Focus Area
@@ -475,7 +562,6 @@ export default function ProjectForm() {
                                 </div>
                             </div>
 
-                            {/* Scale */}
                             <div className="mt-6">
                                 <h3 className="text-xs font-semibold uppercase text-gray-700 mb-3">
                                     Scale
@@ -498,18 +584,40 @@ export default function ProjectForm() {
                                 </div>
                             </div>
 
-                            {/* Button */}
-                            <div className="mt-8">
+                            <div className="mt-8 flex gap-3">
                                 <button
                                     onClick={handleGenerate}
                                     disabled={loading}
-                                    className="w-full bg-[#2952F3] hover:bg-[#1f45dd] text-white rounded-xl py-4 text-sm font-semibold"
+                                    className="flex-1 bg-[#2952F3] hover:bg-[#1f45dd] disabled:bg-gray-300 text-white rounded-xl py-4 text-sm font-semibold"
                                 >
                                     {loading
                                         ? "Generating..."
                                         : generatedProject
                                             ? "Regenerate Project"
                                             : "Generate Project with HELPSTiR AI"}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setGeneratedProject(null);
+                                        setNGOList([]);
+                                        setLoading(false);
+                                        setSelectedNgo(null);
+                                        setIsSendingRFP(false);
+                                        setFormData({
+                                            vision: "",
+                                            gender: "",
+                                            geography: "",
+                                            budget: "",
+                                            beneficiary: "",
+                                            area: "",
+                                            scale: "",
+                                        });
+                                    }}
+                                    className="px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-4 text-sm font-semibold"
+                                >
+                                    Reset
                                 </button>
                             </div>
                         </div>
@@ -574,7 +682,6 @@ export default function ProjectForm() {
                             {generatedTab === "proposal" ? (
                                 <div className="space-y-8">
 
-                                    {/* Executive Summary */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Executive Summary
@@ -584,7 +691,6 @@ export default function ProjectForm() {
                                         </p>
                                     </div>
 
-                                    {/* Problem Statement */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Problem Statement
@@ -594,7 +700,6 @@ export default function ProjectForm() {
                                         </p>
                                     </div>
 
-                                    {/* Objectives */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Objectives
@@ -604,7 +709,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Target Beneficiaries */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Target Beneficiaries
@@ -614,7 +718,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Project Approach */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Project Approach
@@ -624,7 +727,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Expected Outcomes */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Expected Outcomes
@@ -634,7 +736,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Timeline */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Implementation Timeline
@@ -644,7 +745,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Budget */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Estimated Budget Summary
@@ -654,7 +754,6 @@ export default function ProjectForm() {
                                         </div>
                                     </div>
 
-                                    {/* Conclusion */}
                                     <div>
                                         <h3 className="text-[12px] font-semibold uppercase text-gray-500 mb-3">
                                             Conclusion
@@ -684,12 +783,12 @@ export default function ProjectForm() {
                                                 >
                                                     <div className="flex items-start gap-4 flex-1">
 
-                                                        {/* NGO Logo */}
+                                                   
                                                         <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center text-[#4A4A6A] font-semibold">
                                                             {initials}
                                                         </div>
 
-                                                        {/* NGO Details */}
+                                                 
                                                         <div className="flex-1">
                                                             <h3 className="font-semibold text-[13px] text-[#111827]">
                                                                 {ngo.name}
@@ -712,7 +811,7 @@ export default function ProjectForm() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Score */}
+                                             
                                                     <div className="flex items-center gap-4 ml-6">
 
                                                         <div className="flex items-center gap-3">
@@ -745,6 +844,9 @@ export default function ProjectForm() {
                                                         <input
                                                             type="radio"
                                                             name="selectedNgo"
+                                                            value={ngo.org_id}
+                                                            checked={selectedNgo?.org_id === ngo.org_id}
+                                                            onChange={() => setSelectedNgo(ngo)}
                                                             className="w-5 h-5"
                                                         />
                                                     </div>
@@ -757,7 +859,7 @@ export default function ProjectForm() {
                                         </div>
                                     )}
 
-                                    {/* Info Box */}
+                            
                                     <div className="flex mt-10 bg-[#FFF6E8] border border-[#F4D29A] rounded-2xl p-3 gap-4">
                                         <div className="flex items-center justify-center">
                                             <p className="font-semibold text-[#92400E] text-[14px]">
@@ -778,10 +880,14 @@ export default function ProjectForm() {
 
                                     </div>
 
-                                    {/* Actions */}
+                                
                                     <div className="grid grid-cols-2 gap-4 mt-6">
-                                        <button className="bg-[#2952F3] text-[13px] hover:bg-[#1F45DD] text-white py-2 rounded-xl font-semibold">
-                                            Send RFP to selected NGOs
+                                        <button
+                                            onClick={handleSendRFP}
+                                            disabled={!selectedNgo || isSendingRFP}
+                                            className="bg-[#2952F3] text-[13px] hover:bg-[#1F45DD] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 rounded-xl font-semibold"
+                                        >
+                                            {isSendingRFP ? "Sending RFP..." : "Send RFP to selected NGOs"}
                                         </button>
 
                                         <button

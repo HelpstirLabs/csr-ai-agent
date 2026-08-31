@@ -11,7 +11,7 @@ export const handleProjectDesign = async (payload) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
-                credentials:"include"
+                credentials: "include"
             }
         );
 
@@ -38,7 +38,7 @@ export const fetchNGOsData = async () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(),
-                credentials:"include"
+                credentials: "include"
             }
         );
 
@@ -54,3 +54,33 @@ export const fetchNGOsData = async () => {
         throw error;
     }
 }
+
+export const sendRFP = async (projectId, ngoId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/project-generator/send-rfp/${projectId}/${ngoId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      const backendError = new Error(data.detail?.message || "Failed to send RFP");
+      backendError.detail = data.detail;
+      backendError.status = response.status;
+      throw backendError;
+    }
+
+    return data;
+
+  } catch (error) {
+    console.error("sendRFP API error:", error);
+    throw error;
+  }
+};

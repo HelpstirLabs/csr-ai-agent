@@ -5,6 +5,7 @@ from app.api.auth import router as auth_router
 from app.api.user import user_router
 from app.api.csr_mandate import csr_router
 from app.api.project import project_router
+from app.api.rfp import rfp_router
 from app.core.database import engine, Base
 from app.models.user import User
 
@@ -28,6 +29,7 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(csr_router)
 app.include_router(project_router)
+app.include_router(rfp_router)
 
 
 @app.on_event("startup")

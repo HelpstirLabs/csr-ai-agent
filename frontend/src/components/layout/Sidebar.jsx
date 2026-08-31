@@ -5,7 +5,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Sidebar({
@@ -34,21 +34,29 @@ export default function Sidebar({
         }`}
     >
       <div className="flex flex-col h-full">
-        {/* Logo */}
+
         <div
           className={`h-14 border-b px-4 flex items-center ${collapsed
-              ? "justify-center"
-              : "justify-between"
+            ? "justify-center"
+            : "justify-between"
             }`}
         >
           {!collapsed && (
-            <h1
-              onClick={() => navigate("/design")}
-              className="font-heading text-[18px] font-extrabold tracking-[-0.02em] cursor-pointer"
-            >
-              <span className="text-blue-600">HELP</span>
-              <span className="text-black">STiR</span>
-            </h1>
+            <Link
+              to="/design"
+              className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-90 sm:gap-3">
+              <img
+                src="/logo.svg"
+                alt="HELPSTiR Logo"
+                className="h-7 w-auto sm:h-10"
+              />
+
+              <img
+                src="/helpstir-image.png"
+                alt="HELPSTiR"
+                className="h-3.5 w-auto sm:h-5"
+              />
+            </Link>
           )}
 
           <button
@@ -72,12 +80,6 @@ export default function Sidebar({
           )}
 
           <div className="px-3 space-y-1">
-            {/* <MenuItem
-              path="/dashboard"
-              icon={<LayoutGrid size={18} />}
-              text="My Portfolio"
-              collapsed={collapsed}
-            /> */}
 
             <MenuItem
               path="/design"
@@ -90,7 +92,6 @@ export default function Sidebar({
               path="/rfptracker"
               icon={<MessageSquare size={18} />}
               text="RFP Tracker"
-              badge="3"
               collapsed={collapsed}
             />
           </div>

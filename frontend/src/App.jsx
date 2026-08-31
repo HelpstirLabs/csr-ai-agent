@@ -13,6 +13,9 @@ import RFP from "./pages/RFP";
 import { PrivateRoute } from "./routes/PrivateRoute";
 import { PublicRoute } from "./routes/PublicRoute";
 import ScrollToTop from "./components/ScrollToTop";
+import RFPDetail from "./pages/RFPDetail";
+import RFPEOIDetail from "./components/RFPEOIDetail";
+import RFPEOI from "./pages/RFPEOI";
 
 function App() {
   return (
@@ -38,14 +41,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        /> */}
+    
         <Route
           path="/rfptracker"
           element={
@@ -53,6 +49,20 @@ function App() {
               <RFP />
             </PrivateRoute>
           }
+        />
+        <Route
+          path="/rfptracker/:projectId"
+          element={
+            <PrivateRoute>
+              <RFPDetail />
+            </PrivateRoute>}
+        />
+        <Route
+          path="/rfp/:projectId/:ngomatchId"
+          element={
+            <PrivateRoute>
+              <RFPEOI />
+            </PrivateRoute>}
         />
         <Route
           path="/profile"

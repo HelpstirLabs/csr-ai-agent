@@ -4,14 +4,32 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
+def get_smtp_connection():
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = int(os.getenv("SMTP_PORT", "465"))
+
+    if smtp_port == 465:
+        return smtplib.SMTP_SSL(
+            smtp_host,
+            smtp_port,
+            timeout=30,
+        )
+
+    server = smtplib.SMTP(
+        smtp_host,
+        smtp_port,
+        timeout=30,
+    )
+
+    server.starttls()
+
+    return server
+
+
 async def send_test_email(
     to_email: str,
     ngo_id: str,
 ):
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(
-        os.getenv("SMTP_PORT", "587")
-    )
     smtp_username = os.getenv("SMTP_USERNAME")
     smtp_password = os.getenv("SMTP_PASSWORD")
     from_email = os.getenv(
@@ -20,7 +38,8 @@ async def send_test_email(
     )
 
     subject = "RFP Request from Helpstir"
-    body = f"""
+
+    body = """
 Hello,
 
 You have received a new RFP request from a CSR Funder through Helpstir.
@@ -43,12 +62,7 @@ Helpstir Team
         MIMEText(body, "plain")
     )
 
-    with smtplib.SMTP(
-        smtp_host,
-        smtp_port,
-    ) as server:
-
-        server.starttls()
+    with get_smtp_connection() as server:
 
         server.login(
             smtp_username,
@@ -67,16 +81,12 @@ async def send_email(
     subject: str,
     body: str,
 ):
-    sender_email = os.getenv("SMTP_USERNAME")
-    sender_password = os.getenv("SMTP_PASSWORD")
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(
-        os.getenv("SMTP_PORT", "587")
-    )
+    smtp_username = os.getenv("SMTP_USERNAME")
+    smtp_password = os.getenv("SMTP_PASSWORD")
     from_email = os.getenv(
-            "SMTP_FROM_EMAIL",
-            sender_email,
-        )
+        "SMTP_FROM_EMAIL",
+        smtp_username,
+    )
 
     message = MIMEMultipart()
 
@@ -88,20 +98,15 @@ async def send_email(
         MIMEText(body, "plain")
     )
 
-    with smtplib.SMTP(
-        smtp_host,
-        smtp_port
-    ) as server:
-
-        server.starttls()
+    with get_smtp_connection() as server:
 
         server.login(
-            sender_email,
-            sender_password
+            smtp_username,
+            smtp_password,
         )
 
         server.sendmail(
-            sender_email,
+            from_email,
             to_email,
-            message.as_string()
+            message.as_string(),
         )

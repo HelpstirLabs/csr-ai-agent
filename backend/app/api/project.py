@@ -673,6 +673,19 @@ async def generate_project(
                     "NGO UUID validation: PASS"
                 )
 
+                logger.info(
+    "NGO FIELD LENGTHS | org_id=%s | name=%s | description=%s | area=%s | email=%s | phone=%s | whatsapp=%s | website=%s | logo=%s",
+    org_id,
+    len(ngo.get("name") or ""),
+    len(ngo.get("description") or ""),
+    len(ngo.get("area") or ""),
+    len(ngo.get("contact_email") or ""),
+    len(ngo.get("contact_phone") or ""),
+    len(ngo.get("whatsapp_number") or ""),
+    len(ngo.get("website") or ""),
+    len(ngo.get("logo") or ""),
+)
+
                 ngo_match = ProjectNGOMatch(
                     project_id=project.id,
 

@@ -41,7 +41,76 @@ async def generate_project(
     current_user: User = Depends(auth_middleware),
 ):
     try:
-        # 1. GENERATE PROJECT CONTENT
+
+        # =========================================================
+        # STEP 1: REQUEST RECEIVED
+        # =========================================================
+
+        logger.info("")
+        logger.info("=" * 70)
+        logger.info("PROJECT GENERATION REQUEST STARTED")
+        logger.info("=" * 70)
+
+        logger.info("STEP 1/12 - Request received")
+
+        logger.info(
+            "User ID: %s",
+            current_user.id,
+        )
+
+        logger.info(
+            "Vision: %s",
+            payload.vision,
+        )
+
+        logger.info(
+            "Gender: %s",
+            payload.gender,
+        )
+
+        logger.info(
+            "Geography: %s",
+            payload.geography,
+        )
+
+        logger.info(
+            "Budget: %s",
+            payload.budget,
+        )
+
+        logger.info(
+            "Duration: %s",
+            payload.duration,
+        )
+
+        logger.info(
+            "Beneficiary: %s",
+            payload.beneficiary,
+        )
+
+        logger.info(
+            "Area: %s",
+            payload.area,
+        )
+
+        logger.info(
+            "Scale: %s",
+            payload.scale,
+        )
+
+        logger.info(
+            "STEP 1/12 - Request validation complete"
+        )
+
+
+        # =========================================================
+        # STEP 2: GENERATE PROJECT CONTENT USING CLAUDE
+        # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 2/12 - Starting Claude proposal generation"
+        )
 
         generated = await generate_proposal(
             vision=payload.vision,
@@ -54,9 +123,24 @@ async def generate_project(
             scale=payload.scale,
         )
 
+        logger.info(
+            "STEP 2/12 - Claude proposal generation completed"
+        )
+
+        logger.info(
+            "Generated response type: %s",
+            type(generated).__name__,
+        )
+
+
         # =========================================================
-        # 2. EXTRACT GENERATED VALUES
+        # STEP 3: EXTRACT GENERATED VALUES
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 3/12 - Extracting generated project data"
+        )
 
         project_title = generated.get(
             "project_title"
@@ -76,35 +160,100 @@ async def generate_project(
             []
         )
 
+        logger.info(
+            "Project title received: %s",
+            bool(project_title),
+        )
+
+        logger.info(
+            "Proposal received: %s",
+            bool(proposal),
+        )
+
+        logger.info(
+            "Key activities count: %s",
+            len(key_activities)
+            if isinstance(key_activities, list)
+            else "INVALID",
+        )
+
+        logger.info(
+            "Partner requirements count: %s",
+            len(partner_requirements)
+            if isinstance(partner_requirements, list)
+            else "INVALID",
+        )
+
+        logger.info(
+            "STEP 3/12 - Generated project data extracted"
+        )
+
+
         # =========================================================
-        # 3. VALIDATE GENERATED DATA
+        # STEP 4: VALIDATE GENERATED DATA
         # =========================================================
 
+        logger.info("")
+        logger.info(
+            "STEP 4/12 - Validating Claude generated data"
+        )
+
         if not project_title:
+            logger.error(
+                "STEP 4/12 FAILED - Project title missing"
+            )
+
             raise HTTPException(
                 status_code=500,
                 detail="Project title was not generated.",
             )
 
+        logger.info(
+            "Project title validation: PASS"
+        )
+
+
         if not proposal:
+            logger.error(
+                "STEP 4/12 FAILED - Proposal missing"
+            )
+
             raise HTTPException(
                 status_code=500,
                 detail="Proposal was not generated.",
             )
 
+        logger.info(
+            "Proposal validation: PASS"
+        )
+
+
         if not isinstance(
             key_activities,
-            list
+            list,
         ):
+            logger.error(
+                "STEP 4/12 FAILED - key_activities is not a list"
+            )
+
             raise HTTPException(
                 status_code=500,
                 detail="Invalid key activities generated.",
             )
 
+        logger.info(
+            "Key activities validation: PASS"
+        )
+
+
         if not isinstance(
             partner_requirements,
-            list
+            list,
         ):
+            logger.error(
+                "STEP 4/12 FAILED - partner_requirements is not a list"
+            )
+
             raise HTTPException(
                 status_code=500,
                 detail=(
@@ -112,68 +261,104 @@ async def generate_project(
                 ),
             )
 
+        logger.info(
+            "Partner requirements validation: PASS"
+        )
+
+
+        logger.info(
+            "STEP 4/12 - Generated data validation completed"
+        )
+
+
         # =========================================================
-        # 4. PRINT GENERATED DATA
+        # GENERATED DATA SUMMARY
         # =========================================================
 
-        print(
-            "\n"
-            "=================================================="
+        logger.info("")
+        logger.info(
+            "-" * 70
         )
 
-        print(
-            "GENERATED PROJECT"
+        logger.info(
+            "GENERATED PROJECT SUMMARY"
         )
 
-        print(
-            "=================================================="
+        logger.info(
+            "-" * 70
         )
 
-        print(
-            f"\nPROJECT TITLE:\n{project_title}"
+        logger.info(
+            "Project title: %s",
+            project_title,
         )
 
-        print(
-            "\nKEY ACTIVITIES:"
+        logger.info(
+            "Key activities: %d",
+            len(key_activities),
+        )
+
+        logger.info(
+            "Partner requirements: %d",
+            len(partner_requirements),
+        )
+
+        logger.info(
+            "Proposal characters: %d",
+            len(proposal),
+        )
+
+        logger.info(
+            "-" * 70
+        )
+
+
+        # =========================================================
+        # PRINT KEY ACTIVITIES
+        # =========================================================
+
+        logger.info(
+            "KEY ACTIVITIES"
         )
 
         for index, activity in enumerate(
             key_activities,
-            start=1
+            start=1,
         ):
-            print(
-                f"{index}. {activity}"
+            logger.info(
+                "Activity %d: %s",
+                index,
+                activity,
             )
 
-        print(
-            "\nWHAT THE CSR FUNDER IS LOOKING FOR "
-            "IN A PARTNER:"
+
+        # =========================================================
+        # PRINT PARTNER REQUIREMENTS
+        # =========================================================
+
+        logger.info(
+            "PARTNER REQUIREMENTS"
         )
 
         for index, requirement in enumerate(
             partner_requirements,
-            start=1
+            start=1,
         ):
-            print(
-                f"{index}. {requirement}"
+            logger.info(
+                "Requirement %d: %s",
+                index,
+                requirement,
             )
 
-        print(
-            "\nPROPOSAL:"
-        )
-
-        print(
-            proposal
-        )
-
-        print(
-            "\n"
-            "=================================================="
-        )
 
         # =========================================================
-        # 5. FETCH NGO NEED CAPTURE
+        # STEP 5: FETCH NGO NEED CAPTURE
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 5/12 - Fetching NGO need capture data"
+        )
 
         ngo_url = (
             "http://127.0.0.1:8088"
@@ -185,22 +370,67 @@ async def generate_project(
             "area": payload.area,
         }
 
+        logger.info(
+            "NGO need capture URL: %s",
+            ngo_url,
+        )
+
+        logger.info(
+            "NGO need capture parameters: %s",
+            ngo_params,
+        )
+
         async with httpx.AsyncClient(
             timeout=60.0
         ) as client:
+
+            logger.info(
+                "Sending GET request to NGO need capture API"
+            )
 
             response = await client.get(
                 ngo_url,
                 params=ngo_params,
             )
 
+            logger.info(
+                "NGO need capture response status: %s",
+                response.status_code,
+            )
+
             response.raise_for_status()
 
             ngo_data = response.json()
 
+        logger.info(
+            "NGO need capture response received"
+        )
+
+        logger.info(
+            "NGO need capture response type: %s",
+            type(ngo_data).__name__,
+        )
+
+        logger.info(
+            "NGO records/IDs returned: %d",
+            len(ngo_data)
+            if hasattr(ngo_data, "__len__")
+            else 0,
+        )
+
+        logger.info(
+            "STEP 5/12 - NGO need capture completed"
+        )
+
+
         # =========================================================
-        # 6. EXTRACT NGO IDS
+        # STEP 6: EXTRACT NGO IDS
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 6/12 - Extracting NGO organization IDs"
+        )
 
         selected_org_ids = list(
             dict.fromkeys(
@@ -210,9 +440,46 @@ async def generate_project(
             )
         )
 
+        logger.info(
+            "Unique NGO IDs found: %d",
+            len(selected_org_ids),
+        )
+
+        if selected_org_ids:
+
+            logger.info(
+                "NGO organization IDs:"
+            )
+
+            for index, org_id in enumerate(
+                selected_org_ids,
+                start=1,
+            ):
+                logger.info(
+                    "NGO ID %d: %s",
+                    index,
+                    org_id,
+                )
+
+        else:
+
+            logger.info(
+                "No matching NGO organization IDs found"
+            )
+
+        logger.info(
+            "STEP 6/12 - NGO ID extraction completed"
+        )
+
+
         # =========================================================
-        # 7. CREATE PROJECT REQUEST
+        # STEP 7: CREATE PROJECT REQUEST
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 7/12 - Creating ProjectRequest database object"
+        )
 
         project = ProjectRequest(
             vision=payload.vision,
@@ -227,33 +494,57 @@ async def generate_project(
             area=payload.area,
             scale=payload.scale,
 
-            # Generated project title
             project_title=project_title,
 
-            # Generated proposal text
             proposal=proposal,
 
-            # Generated JSON arrays
             key_activities=key_activities,
 
             partner_requirements=partner_requirements,
         )
 
+        logger.info(
+            "ProjectRequest object created"
+        )
+
         db.add(project)
 
-        # Generate project ID before creating NGO matches
+        logger.info(
+            "ProjectRequest added to database session"
+        )
+
+        logger.info(
+            "Flushing database to generate project ID"
+        )
+
         await db.flush()
 
+        logger.info(
+            "Project ID generated: %s",
+            project.id,
+        )
+
+        logger.info(
+            "STEP 7/12 - ProjectRequest created successfully"
+        )
+
+
         # =========================================================
-        # 8. FETCH NGO DETAILS
+        # STEP 8: FETCH NGO DETAILS
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 8/12 - Fetching NGO details"
+        )
 
         ngo_details = []
 
         if selected_org_ids:
 
             logger.info(
-                "STEP 6: Fetching NGO details"
+                "NGO IDs available: %d",
+                len(selected_org_ids),
             )
 
             org_url = (
@@ -261,9 +552,18 @@ async def generate_project(
                 "/api/v1/project-generator/by-ids"
             )
 
+            logger.info(
+                "NGO details URL: %s",
+                org_url,
+            )
+
             async with httpx.AsyncClient(
                 timeout=60.0
             ) as client:
+
+                logger.info(
+                    "Sending POST request to NGO details API"
+                )
 
                 org_response = await client.post(
                     org_url,
@@ -272,23 +572,68 @@ async def generate_project(
                     },
                 )
 
+                logger.info(
+                    "NGO details response status: %s",
+                    org_response.status_code,
+                )
+
                 org_response.raise_for_status()
 
                 ngo_details = org_response.json()
 
+            logger.info(
+                "NGO details response received"
+            )
+
+            logger.info(
+                "NGO details returned: %d",
+                len(ngo_details)
+                if isinstance(ngo_details, list)
+                else 0,
+            )
+
         else:
+
+            logger.info(
+                "No NGO IDs available"
+            )
 
             logger.info(
                 "Skipping NGO details API call"
             )
 
+        logger.info(
+            "STEP 8/12 - NGO details fetch completed"
+        )
+
+
         # =========================================================
-        # 9. SAVE NGO MATCHES
+        # STEP 9: SAVE NGO MATCHES
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 9/12 - Saving NGO matches"
+        )
 
         saved_ngo_count = 0
 
-        for ngo in ngo_details:
+        if not ngo_details:
+
+            logger.info(
+                "No NGO details to save"
+            )
+
+        for index, ngo in enumerate(
+            ngo_details,
+            start=1,
+        ):
+
+            logger.info(
+                "Processing NGO %d/%d",
+                index,
+                len(ngo_details),
+            )
 
             org_id = ngo.get(
                 "org_id"
@@ -297,21 +642,41 @@ async def generate_project(
             if not org_id:
 
                 logger.warning(
-                    "Skipping NGO because org_id "
-                    "is missing: %s",
-                    ngo,
+                    "NGO %d skipped - org_id missing",
+                    index,
                 )
 
                 continue
 
+            logger.info(
+                "NGO organization ID: %s",
+                org_id,
+            )
+
+            logger.info(
+                "NGO name: %s",
+                ngo.get("name"),
+            )
+
+            logger.info(
+                "NGO score: %s",
+                ngo.get("score"),
+            )
+
             try:
+
+                ngo_uuid = uuid.UUID(
+                    str(org_id)
+                )
+
+                logger.info(
+                    "NGO UUID validation: PASS"
+                )
 
                 ngo_match = ProjectNGOMatch(
                     project_id=project.id,
 
-                    org_id=uuid.UUID(
-                        str(org_id)
-                    ),
+                    org_id=ngo_uuid,
 
                     name=ngo.get(
                         "name"
@@ -358,7 +723,17 @@ async def generate_project(
 
                 saved_ngo_count += 1
 
+                logger.info(
+                    "NGO %d saved successfully",
+                    index,
+                )
+
             except ValueError:
+
+                logger.error(
+                    "Invalid NGO organization UUID: %s",
+                    org_id,
+                )
 
                 raise HTTPException(
                     status_code=500,
@@ -368,25 +743,83 @@ async def generate_project(
                     ),
                 )
 
+        logger.info(
+            "Total NGO matches saved to session: %d",
+            saved_ngo_count,
+        )
+
+        logger.info(
+            "STEP 9/12 - NGO matches processing completed"
+        )
+
+
         # =========================================================
-        # 10. COMMIT EVERYTHING
+        # STEP 10: COMMIT EVERYTHING
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 10/12 - Committing transaction"
+        )
+
+        logger.info(
+            "Project ID: %s",
+            project.id,
+        )
+
+        logger.info(
+            "NGO matches being committed: %d",
+            saved_ngo_count,
+        )
 
         await db.commit()
 
+        logger.info(
+            "Database commit successful"
+        )
+
+        logger.info(
+            "STEP 10/12 - Transaction committed successfully"
+        )
+
+
         # =========================================================
-        # 11. REFRESH PROJECT
+        # STEP 11: REFRESH PROJECT
         # =========================================================
+
+        logger.info("")
+        logger.info(
+            "STEP 11/12 - Refreshing project from database"
+        )
 
         await db.refresh(
             project
         )
 
+        logger.info(
+            "Project refreshed successfully"
+        )
+
+        logger.info(
+            "Project ID after refresh: %s",
+            project.id,
+        )
+
+        logger.info(
+            "STEP 11/12 - Project refresh completed"
+        )
+
+
         # =========================================================
-        # 12. RESPONSE
+        # STEP 12: BUILD RESPONSE
         # =========================================================
 
-        return {
+        logger.info("")
+        logger.info(
+            "STEP 12/12 - Building API response"
+        )
+
+        result = {
             "project_id": str(
                 project.id
             ),
@@ -410,9 +843,119 @@ async def generate_project(
                 saved_ngo_count,
         }
 
+        logger.info(
+            "Response project ID: %s",
+            result["project_id"],
+        )
+
+        logger.info(
+            "Response NGO match count: %d",
+            result["ngo_match_count"],
+        )
+
+        logger.info(
+            "STEP 12/12 - Response prepared successfully"
+        )
+
+
+        # =========================================================
+        # PROJECT GENERATION COMPLETED
+        # =========================================================
+
+        logger.info("")
+        logger.info("=" * 70)
+        logger.info(
+            "PROJECT GENERATION COMPLETED SUCCESSFULLY"
+        )
+        logger.info("=" * 70)
+
+        logger.info(
+            "Project ID: %s",
+            project.id,
+        )
+
+        logger.info(
+            "Project title: %s",
+            project_title,
+        )
+
+        logger.info(
+            "Geography: %s",
+            payload.geography,
+        )
+
+        logger.info(
+            "Area: %s",
+            payload.area,
+        )
+
+        logger.info(
+            "Budget: %s",
+            payload.budget,
+        )
+
+        logger.info(
+            "Duration: %s",
+            payload.duration,
+        )
+
+        logger.info(
+            "NGO matches: %d",
+            saved_ngo_count,
+        )
+
+        logger.info("=" * 70)
+        logger.info("")
+
+        return result
+
+
+    # =============================================================
+    # HTTPX ERROR
+    # =============================================================
+
     except httpx.HTTPError as e:
 
         await db.rollback()
+
+        logger.exception(
+            ""
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "PROJECT GENERATION FAILED - NGO API ERROR"
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "HTTPX error: %s",
+            str(e),
+        )
+
+        logger.error(
+            "Geography: %s",
+            payload.geography,
+        )
+
+        logger.error(
+            "Area: %s",
+            payload.area,
+        )
+
+        logger.error(
+            "Database transaction rolled back"
+        )
+
+        logger.error(
+            "=" * 70
+        )
 
         raise HTTPException(
             status_code=500,
@@ -422,26 +965,106 @@ async def generate_project(
             ),
         )
 
+
+    # =============================================================
+    # HTTP EXCEPTION
+    # =============================================================
+
     except HTTPException:
 
         await db.rollback()
 
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "PROJECT GENERATION FAILED - HTTP EXCEPTION"
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "Database transaction rolled back"
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
         raise
+
+
+    # =============================================================
+    # UNEXPECTED ERROR
+    # =============================================================
 
     except Exception as e:
 
         await db.rollback()
 
         logger.exception(
-            "Project generation failed"
+            "PROJECT GENERATION FAILED - UNEXPECTED ERROR"
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "PROJECT GENERATION FAILED"
+        )
+
+        logger.error(
+            "=" * 70
+        )
+
+        logger.error(
+            "Error type: %s",
+            type(e).__name__,
+        )
+
+        logger.error(
+            "Error message: %s",
+            str(e),
+        )
+
+        logger.error(
+            "User ID: %s",
+            current_user.id,
+        )
+
+        logger.error(
+            "Geography: %s",
+            payload.geography,
+        )
+
+        logger.error(
+            "Area: %s",
+            payload.area,
+        )
+
+        logger.error(
+            "Budget: %s",
+            payload.budget,
+        )
+
+        logger.error(
+            "Database transaction rolled back"
+        )
+
+        logger.error(
+            "=" * 70
         )
 
         raise HTTPException(
             status_code=500,
             detail=str(e),
         )
-    
 
+    
 @project_router.post("/send-rfp/{project_id}/{ngo_id}")
 async def send_rfp(
     project_id: uuid.UUID,

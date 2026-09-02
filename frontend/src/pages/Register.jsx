@@ -21,6 +21,10 @@ export default function Register() {
   const [showOtpScreen, setShowOtpScreen] = useState(false);
   const [otp, setOtp] = useState("");
   const [userId, setUserId] = useState(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -53,7 +57,6 @@ export default function Register() {
         return;
       }
 
-
       // Email Validation
       if (!validateEmail(formData.email)) {
         toast.error("Please enter a valid email address");
@@ -72,7 +75,11 @@ export default function Register() {
         return;
       }
 
+      // Start loading only after validation
+      setIsRegistering(true);
+
       const result = await userRegister(formData);
+
       if (
         result.status === 200 ||
         result.status === 201 ||
@@ -85,6 +92,7 @@ export default function Register() {
         });
 
         console.log("Registration Result:", result.user_id);
+
         setUserId(result.user_id);
         setShowOtpScreen(true);
 
@@ -97,6 +105,7 @@ export default function Register() {
           autoClose: 2500,
           pauseOnHover: false,
         });
+
         return;
       }
 
@@ -105,16 +114,24 @@ export default function Register() {
         autoClose: 2500,
         pauseOnHover: false,
       });
+
     } catch (error) {
       console.error("Registration Error:", error);
 
-      toast.error("An unexpected error occurred. Please try again.", {
-        position: "top-right",
-        autoClose: 2500,
-        pauseOnHover: false,
-      });
+      toast.error(
+        "An unexpected error occurred. Please try again.",
+        {
+          position: "top-right",
+          autoClose: 2500,
+          pauseOnHover: false,
+        }
+      );
+
+    } finally {
+      setIsRegistering(false);
     }
   };
+
 
   const handleVerifyOtp = async () => {
     try {
@@ -122,41 +139,105 @@ export default function Register() {
         toast.error("Please enter OTP");
         return;
       }
-      console.log("Verifying OTP for User ID:", userId, "with OTP:", otp);
 
-      const result = await userOTPVerification(userId, otp);
+      setIsVerifyingOtp(true);
 
-      if (result.status === 200 || result.success === true) {
+      console.log(
+        "Verifying OTP for User ID:",
+        userId,
+        "with OTP:",
+        otp
+      );
+
+      const result = await userOTPVerification(
+        userId,
+        otp
+      );
+
+      if (
+        result.status === 200 ||
+        result.success === true
+      ) {
         toast.success("OTP verified successfully", {
           position: "top-right",
           autoClose: 2500,
           pauseOnHover: false,
         });
+
         navigate("/");
         return;
       }
+
+      toast.error(
+        result.message || "Invalid OTP. Please try again.",
+        {
+          position: "top-right",
+          autoClose: 2500,
+          pauseOnHover: false,
+        }
+      );
+
     } catch (error) {
       console.error("OTP Verification Error:", error);
+
+      toast.error(
+        error.message || "OTP verification failed.",
+        {
+          position: "top-right",
+          autoClose: 2500,
+          pauseOnHover: false,
+        }
+      );
+
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
+
   const handleResendOtp = async () => {
+    if (!userId) {
+      toast.error("User information is missing.");
+      return;
+    }
+
     try {
+      setIsResendingOtp(true);
       const result = await userOTPResend(userId);
+
       if (result.status === 200 || result.success === true) {
         toast.success("OTP resent successfully", {
           position: "top-right",
           autoClose: 2500,
           pauseOnHover: false,
         });
+
         return;
       }
+
+      throw new Error(
+        result.message || "Failed to resend OTP"
+      );
+
     } catch (error) {
-      toast.error("Failed to resend OTP");
-      console.error("OTP Resend Error:", error);
+      console.error(
+        "Resend OTP error:",
+        error
+      );
+
+      toast.error(
+        error.message || "Failed to resend OTP",
+        {
+          position: "top-right",
+          autoClose: 2500,
+          pauseOnHover: false,
+        }
+      );
+
+    } finally {
+      setIsResendingOtp(false);
     }
   };
-
   return (
     <div className="min-h-screen flex">
       {/* Left Section */}
@@ -167,10 +248,21 @@ export default function Register() {
         <div className="flex flex-col h-full w-full p-14">
           {/* Logo */}
           <div>
-            <h1 className="font-heading text-[22px] font-extrabold tracking-[-0.02em] leading-none">
-              <span className="text-[#FFFFFFB3]">HELP</span>
-              <span className="text-white">STiR</span>
-            </h1>
+            <Link
+              to="/design"
+              className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-90 sm:gap-3">
+              <img
+                src="/footer-logo.png"
+                alt="HELPSTiR Logo"
+                className="h-9 w-auto sm:h-12"
+              />
+
+              <img
+                src="/footer-image.png"
+                alt="HELPSTiR"
+                className="h-3.5 w-auto sm:h-5"
+              />
+            </Link>
 
             <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
               CSR Intelligence Platform
@@ -340,18 +432,19 @@ export default function Register() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-all"
+                disabled={isRegistering}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue-600"
               >
-                Continue →
+                {isRegistering ? "Registering..." : "Continue →"}
               </button>
 
               <p className="text-[11px] text-center text-gray-500">
                 By continuing, you agree to HELPSTIR's{" "}
-                <a href="/terms" className="text-blue-600">
+                <a className="text-blue-600">
                   Terms of Service
                 </a>{" "}
                 and{" "}
-                <a href="/privacy" className="text-blue-600">
+                <a className="text-blue-600">
                   Privacy Policy
                 </a>
                 .
@@ -381,17 +474,19 @@ export default function Register() {
               <button
                 type="button"
                 onClick={handleVerifyOtp}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-all"
+                disabled={isVerifyingOtp}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue-600"
               >
-                Verify OTP
+                {isVerifyingOtp ? "Verifying..." : "Verify OTP"}
               </button>
 
               <button
                 type="button"
                 onClick={handleResendOtp}
-                className="w-full border border-gray-200 text-gray-700 font-medium py-4 rounded-xl hover:bg-gray-50 transition-all"
+                disabled={isResendingOtp}
+                className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Resend OTP
+                {isResendingOtp ? "Resending..." : "Resend OTP"}
               </button>
             </div>
           )}

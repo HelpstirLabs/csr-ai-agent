@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { useAuth } from "../hooks/useAuth";
@@ -19,19 +19,23 @@ export default function Login() {
     const [userId, setUserId] = useState("");
     const [showOtpScreen, setShowOtpScreen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [verifyingOtp, setVerifyingOtp] = useState(false);
+    const [resendingOtp, setResendingOtp] = useState(false);
 
     const handlePhoneChange = (e) => {
         let value = e.target.value;
 
+        value = value.replace(/[^\d+]/g, "");
+
         if (!value.startsWith("+91")) {
-            value = "+91" + value.replace(/\+91\s?/g, "");
+            value = "+91" + value.replace(/\+/g, "");
         }
 
-        const digits = value.replace(/\D/g, "");
+        const number = value.substring(3);
 
-        if (digits.length > 12) return;
+        const limitedNumber = number.slice(0, 10);
 
-        setPhone(value);
+        setPhone(`+91 ${limitedNumber}`);
     };
 
     const handleSubmit = async (e) => {
@@ -39,12 +43,15 @@ export default function Login() {
 
         try {
             setLoading(true);
+            const cleanPhone = phone.replace(/\s+/g, "");
 
-            const response = await authLogin(phone);
+            const response = await authLogin(cleanPhone);
 
-            if (response.status === 200 ||
+            if (
+                response.status === 200 ||
                 response.status === 201 ||
-                response.success === true) {
+                response.success === true
+            ) {
                 toast.success("OTP sent successfully", {
                     position: "top-right",
                     autoClose: 2500,
@@ -55,16 +62,16 @@ export default function Login() {
                 setShowOtpScreen(true);
             } else {
                 toast.error(
-                    response.data.message || "Failed to send OTP", {
-                    position: "top-right",
-                    autoClose: 2500,
-                    pauseOnHover: false,
-                }
+                    response.data.message || "Failed to send OTP",
+                    {
+                        position: "top-right",
+                        autoClose: 2500,
+                        pauseOnHover: false,
+                    }
                 );
             }
         } catch (error) {
             console.error(error);
-
         } finally {
             setLoading(false);
         }
@@ -76,6 +83,8 @@ export default function Login() {
                 toast.error("Please enter OTP");
                 return;
             }
+
+            setVerifyingOtp(true);
 
             const response = await loginOTPVerification(
                 userId,
@@ -95,27 +104,77 @@ export default function Login() {
                 } else {
                     navigate("/design");
                 }
+            } else {
+                toast.error(
+                    response.data.message || "Invalid OTP",
+                    {
+                        position: "top-right",
+                        autoClose: 2500,
+                        pauseOnHover: false,
+                    }
+                );
             }
+
         } catch (error) {
-            console.error(error);
-            toast.error("Failed to verify OTP");
+            console.error("OTP Verification Error:", error);
+
+            toast.error(
+                error.message || "OTP verification failed",
+                {
+                    position: "top-right",
+                    autoClose: 2500,
+                    pauseOnHover: false,
+                }
+            );
+
+        } finally {
+            setVerifyingOtp(false);
         }
     };
 
     const handleResendOtp = async () => {
-        try {
-            const response = await userOTPResend(userId);
+        if (!userId) {
+            toast.error("User information is missing");
+            return;
+        }
 
+        try {
+            setResendingOtp(true);
+            const response = await userOTPResend(userId);
             if (response.success) {
-                toast.success("OTP resent successfully");
+                toast.success("OTP resent successfully", {
+                    position: "top-right",
+                    autoClose: 2500,
+                    pauseOnHover: false,
+                });
             } else {
                 toast.error(
-                    response.message || "Failed to resend OTP"
+                    response.message || "Failed to resend OTP",
+                    {
+                        position: "top-right",
+                        autoClose: 2500,
+                        pauseOnHover: false,
+                    }
                 );
             }
+
         } catch (error) {
-            console.error(error);
-            toast.error("Failed to resend OTP");
+            console.error(
+                "Resend OTP error:",
+                error
+            );
+
+            toast.error(
+                error.message || "Failed to resend OTP",
+                {
+                    position: "top-right",
+                    autoClose: 2500,
+                    pauseOnHover: false,
+                }
+            );
+
+        } finally {
+            setResendingOtp(false);
         }
     };
 
@@ -128,14 +187,21 @@ export default function Login() {
 
                 <div className="flex flex-col h-full w-full p-14">
                     <div>
-                        <h1 className="font-heading text-[22px] font-extrabold tracking-[-0.02em] leading-none">
-                            <span className="text-[#FFFFFFB3]">
-                                HELP
-                            </span>
-                            <span className="text-white">
-                                STiR
-                            </span>
-                        </h1>
+                        <Link
+                            to="/design"
+                            className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-90 sm:gap-3">
+                            <img
+                                src="/footer-logo.png"
+                                alt="HELPSTiR Logo"
+                                className="h-9 w-auto sm:h-12"
+                            />
+
+                            <img
+                                src="/footer-image.png"
+                                alt="HELPSTiR"
+                                className="h-3.5 w-auto sm:h-5"
+                            />
+                        </Link>
 
                         <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
                             CSR Intelligence Platform
@@ -206,10 +272,21 @@ export default function Login() {
 
                     {/* Mobile Logo */}
                     <div className="mb-12 block md:hidden">
-                        <h1 className="font-heading text-[22px] font-extrabold tracking-[-0.02em] leading-none">
-                            <span className="text-[#FFFFFFB3]">HELP</span>
-                            <span className="text-white">STiR</span>
-                        </h1>
+                        <Link
+                            to="/design"
+                            className="flex items-center gap-2 transition-opacity duration-300 hover:opacity-90 sm:gap-3">
+                            <img
+                                src="/footer-logo.png"
+                                alt="HELPSTiR Logo"
+                                className="h-9 w-auto sm:h-12"
+                            />
+
+                            <img
+                                src="/footer-image.png"
+                                alt="HELPSTiR"
+                                className="h-3.5 w-auto sm:h-5"
+                            />
+                        </Link>
 
                         <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
                             CSR Intelligence Platform

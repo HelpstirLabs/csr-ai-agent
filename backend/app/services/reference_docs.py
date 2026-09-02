@@ -6,6 +6,7 @@ REFERENCE_DIR = Path("reference_docs")
 
 def read_docx(file_path: Path) -> str:
     doc = Document(file_path)
+    # // Extract text from paragraphs, ignoring empty ones
 
     paragraphs = [
         p.text.strip()

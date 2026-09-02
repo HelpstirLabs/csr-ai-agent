@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { handleProfileData, saveProfileData } from "../services/api/user";
 import { Input } from "./ui/Input";
 import { Select } from "./ui/Select";
-import { useAuth } from "../hooks/useAuth"; // Assuming you have an auth hook
+import { useAuth } from "../hooks/useAuth";
+import { toast } from "react-toastify";
 
 export default function AboutYou({ nextPage }) {
   const [loading, setLoading] = useState(true);
-  const { userId, profileStrength, checkAuth } = useAuth(); // Assuming you have a hook to get authenticated user info
+  const [saving, setSaving] = useState(false);
+  const { userId, profileStrength, checkAuth } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,25 +64,29 @@ export default function AboutYou({ nextPage }) {
 
   const handleSave = async () => {
     try {
+      setSaving(true);
+
       const response = await saveProfileData(
         userId,
         formData
       );
 
       if (response.success) {
+        await checkAuth();
         nextPage();
-        checkAuth()
       } else {
-        alert(
+        toast.error(
           response.message || "Failed to save profile"
         );
       }
+
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
+    } finally {
+      setSaving(false);
     }
   };
-
   //   if (loading) {
   //     return (
   //       <div className="min-h-screen flex items-center justify-center">
@@ -349,12 +355,15 @@ export default function AboutYou({ nextPage }) {
           </div>
 
           <div className="mt-12 flex justify-end">
-            <button
-              onClick={handleSave}
-              className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition"
-            >
-              Save & Continue →
-            </button>
+            <div className="mt-12 flex justify-end">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue-600"
+              >
+                {saving ? "Saving..." : "Save & Continue →"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

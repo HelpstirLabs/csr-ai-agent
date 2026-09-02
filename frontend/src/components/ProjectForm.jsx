@@ -40,7 +40,7 @@ export default function ProjectForm() {
         gender: "",
         geography: "",
         budget: "",
-        duration:"",
+        duration: "",
         beneficiary: "",
         area: "",
         scale: "",
@@ -369,18 +369,13 @@ export default function ProjectForm() {
 
                                 <div className="flex flex-wrap gap-2">
                                     {[
-                                        "Children",
+                                        "Girls",
                                         "Women",
-                                        "Rural Women",
-                                        "Pregnant Women",
-                                        "Adolescents",
-                                        "Senior Citizens",
-                                        "Persons with Disability",
-                                        "Farmers",
-                                        "Youth",
-                                        "Urban Poor",
-                                        "Rural Poor",
-                                        "SC/ST Communities"
+                                        "Boys",
+                                        "Men",
+                                        "Gender Neutral",
+                                        "Trans-inclusive",
+
                                     ].map((item) => (
                                         <Chip
                                             key={item}
@@ -404,7 +399,7 @@ export default function ProjectForm() {
                                         onChange={(e) =>
                                             handleSelect("geography", e.target.value)
                                         }
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select State</option>
 
@@ -455,7 +450,7 @@ export default function ProjectForm() {
                                         onChange={(e) =>
                                             handleSelect("budget", e.target.value)
                                         }
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select Budget</option>
 
@@ -484,7 +479,7 @@ export default function ProjectForm() {
                                         onChange={(e) =>
                                             handleSelect("duration", e.target.value)
                                         }
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         <option value="">Select Duration</option>
 
@@ -783,12 +778,12 @@ export default function ProjectForm() {
                                                 >
                                                     <div className="flex items-start gap-4 flex-1">
 
-                                                   
+
                                                         <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center text-[#4A4A6A] font-semibold">
                                                             {initials}
                                                         </div>
 
-                                                 
+
                                                         <div className="flex-1">
                                                             <h3 className="font-semibold text-[13px] text-[#111827]">
                                                                 {ngo.name}
@@ -811,7 +806,7 @@ export default function ProjectForm() {
                                                         </div>
                                                     </div>
 
-                                             
+
                                                     <div className="flex items-center gap-4 ml-6">
 
                                                         <div className="flex items-center gap-3">
@@ -859,7 +854,7 @@ export default function ProjectForm() {
                                         </div>
                                     )}
 
-                            
+
                                     <div className="flex mt-10 bg-[#FFF6E8] border border-[#F4D29A] rounded-2xl p-3 gap-4">
                                         <div className="flex items-center justify-center">
                                             <p className="font-semibold text-[#92400E] text-[14px]">
@@ -880,7 +875,7 @@ export default function ProjectForm() {
 
                                     </div>
 
-                                
+
                                     <div className="grid grid-cols-2 gap-4 mt-6">
                                         <button
                                             onClick={handleSendRFP}

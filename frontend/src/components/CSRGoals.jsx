@@ -6,11 +6,12 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom"
 
 export default function CSRGoals(
-  {previousPage}
+  { previousPage }
 ) {
 
   const { profileStrength, userId, checkAuth } = useAuth();
   const navigate = useNavigate()
+  const [saving, setSaving] = useState(false);
 
   const goals = [
     "Verified NGO partners",
@@ -55,20 +56,45 @@ export default function CSRGoals(
   };
 
   const handleSave = async () => {
+    if (saving) return;
+
     try {
-      const response = await saveProfileGoal(userId, formData)
+      setSaving(true);
+
+      const response = await saveProfileGoal(
+        userId,
+        formData
+      );
+
       if (response.success) {
         toast.success("Profile updated successfully", {
           position: "top-right",
           autoClose: 2500,
           pauseOnHover: false,
         });
-        navigate("/design")
+
+        await checkAuth();
+
+        navigate("/design");
+      } else {
+        toast.error(
+          response.message ||
+          "Failed to save profile"
+        );
       }
+
     } catch (error) {
-      console.log(error)
+      console.error("Error saving profile:", error);
+
+      toast.error(
+        error.message ||
+        "Failed to save profile"
+      );
+
+    } finally {
+      setSaving(false);
     }
-  }
+  };
 
   const fetchCSRGoals = async () => {
     try {
@@ -377,10 +403,12 @@ export default function CSRGoals(
             >
               ← Back
             </button>
-            <button onClick={handleSave}
-              className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition"
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue-600"
             >
-              Complete Profile →
+              {saving ? "Saving..." : "Complete Profile →"}
             </button>
           </div>
         </div>

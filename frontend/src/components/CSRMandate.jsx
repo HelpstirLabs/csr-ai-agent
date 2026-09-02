@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { getCSRMandate, saveCSRMandate } from "../services/api/csrmandate";
+import { toast } from "react-toastify";
 
 export default function CSRMandate({
     previousPage,
@@ -16,6 +17,7 @@ export default function CSRMandate({
         focus_areas: [],
         geographic_preferences: [],
     });
+    const [saving, setSaving] = useState(false);
 
     const budgetOptions = [
         {
@@ -150,48 +152,57 @@ export default function CSRMandate({
 
     const handleSave = async () => {
         if (!formData.annual_budget) {
-            return alert("Please select annual budget");
+            return toast.error("Please select annual budget");
         }
 
         if (!formData.deployment_timeline) {
-            return alert("Please select deployment timeline");
+            return toast.error("Please select deployment timeline");
         }
 
         if (!formData.csr_decision_making) {
-            return alert("Please select approval process");
+            return toast.error("Please select approval process");
         }
 
         if (formData.focus_areas.length === 0) {
-            return alert(
+            return toast.error(
                 "Please select at least one focus area"
             );
         }
 
-        if (
-            formData.geographic_preferences.length === 0
-        ) {
-            return alert(
+        if (formData.geographic_preferences.length === 0) {
+            return toast.error(
                 "Please select at least one geographic preference"
             );
         }
+
         try {
-            const response =
-                await saveCSRMandate(
-                    userId,
-                    formData
-                );
+            setSaving(true);
+
+            const response = await saveCSRMandate(
+                userId,
+                formData
+            );
 
             if (response.success) {
+                await checkAuth();
                 nextPage();
-                 checkAuth()
             } else {
-                alert(
+                toast.error(
                     response.message ||
                     "Failed to save CSR mandate"
                 );
             }
+
         } catch (error) {
-            console.error(error);
+            console.error("Error saving CSR mandate:", error);
+
+            toast.error(
+                error.message ||
+                "Something went wrong while saving"
+            );
+
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -463,9 +474,10 @@ export default function CSRMandate({
 
                         <button
                             onClick={handleSave}
-                            className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition"
+                            disabled={saving}
+                            className="px-8 py-3 bg-blue-600 text-white rounded-xl text-[14px] font-medium hover:bg-blue-700 transition disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue-600"
                         >
-                            Save & Continue →
+                            {saving ? "Saving..." : "Save & Continue →"}
                         </button>
                     </div>
                 </div>

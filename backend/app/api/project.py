@@ -548,7 +548,7 @@ async def generate_project(
             )
 
             org_url = (
-                "http://127.0.0.1:8000"
+                "http://127.0.0.1:8088"
                 "/api/v1/project-generator/by-ids"
             )
 
@@ -1379,7 +1379,7 @@ async def send_rfp(
         print("\nSTEP 8: Sending RFP data to NGO application")
 
         ngo_api_url = (
-            "http://127.0.0.1:8000"
+            "http://127.0.0.1:8088"
             "/api/v1/project-generator/rfp/receive_data"
         )
 

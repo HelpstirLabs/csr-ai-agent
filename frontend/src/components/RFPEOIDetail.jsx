@@ -53,8 +53,6 @@ export default function RFPEOIDetail() {
 
       const response = await submitDecline(ngomatchId);
 
-      console.log("Decline EOI response:", response);
-
       if (!response?.success) {
         throw new Error(
           response?.message || "Failed to decline EOI"

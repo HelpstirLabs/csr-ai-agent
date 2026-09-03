@@ -40,8 +40,6 @@ export default function RfpTracker() {
 
       const response = await getRFPs();
 
-      console.log("RFP API Response:", response);
-
       if (!response?.success) {
         throw new Error("Failed to fetch RFPs");
       }

@@ -151,14 +151,10 @@ export default function RfpTrackerDetail() {
 
       const response = await getRFPDetails(projectId);
 
-      console.log("RFP Detail API Response:", response);
-
       const apiData =
         response?.data?.data ||
         response?.data ||
         response;
-
-      console.log("Parsed RFP Detail Data:", apiData);
 
       if (
         !response?.success &&
@@ -199,10 +195,6 @@ export default function RfpTrackerDetail() {
             (ngo) => ngo?.rfp_sent === true
           ).length,
       });
-
-      console.log("Project Request:", projectRequest);
-      console.log("NGO Matches:", matches);
-      console.log("Summary:", apiSummary);
 
     } catch (error) {
       console.error(
@@ -478,12 +470,12 @@ export default function RfpTrackerDetail() {
 
                             <div className="min-w-0">
                               <button
-                                onClick={() => {
-                                  console.log(
-                                    "Open NGO profile:",
-                                    ngo?.org_id || NA
-                                  );
-                                }}
+                                // onClick={() => {
+                                //   console.log(
+                                //     "Open NGO profile:",
+                                //     ngo?.org_id || NA
+                                //   );
+                                // }}
                                 className="block max-w-full truncate text-left text-[15px] font-medium text-[#2952F3] hover:underline"
                               >
                                 {ngoName}
@@ -550,10 +542,10 @@ export default function RfpTrackerDetail() {
                           ) : (
                             <button
                               onClick={() => {
-                                console.log(
-                                  "Send RFP:",
-                                  ngo?.org_id || "N/A"
-                                );
+                                // console.log(
+                                //   "Send RFP:",
+                                //   ngo?.org_id || "N/A"
+                                // );
                               }}
                               className="rounded-xl border border-[#DDE3EA] bg-white px-5 py-2.5 text-[14px] font-medium text-[#071D3A] transition hover:bg-[#F8FAFC]"
                             >

@@ -91,16 +91,12 @@ export default function Login() {
                 otp
             );
 
-            console.log("otp", response);
-
             if (response.data.token) {
                 toast.success("OTP verified successfully", {
                     position: "top-right",
                     autoClose: 2500,
                     pauseOnHover: false,
                 });
-
-                console.log(firstLogin);
 
                 if (firstLogin === 0) {
                     navigate("/welcome");

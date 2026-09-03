@@ -114,8 +114,6 @@ export default function CSRMandate({
             const response =
                 await getCSRMandate(userId);
 
-            console.log("CSR Mandate response:", response);
-
             if (response.success && response.data) {
                 setFormData({
                     annual_budget:

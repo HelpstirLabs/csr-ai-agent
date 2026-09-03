@@ -30,7 +30,7 @@ async def get_profile(
     )
 
     user = result.scalar_one_or_none()
-    print(user.__dict__)
+    # print(user.__dict__)
 
     if user is None:
         raise HTTPException(

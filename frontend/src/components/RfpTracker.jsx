@@ -26,6 +26,12 @@ const statusStyles = {
     dot: "bg-[#2952F3]",
     label: "Closed",
   },
+
+  draft: {
+    wrapper: "bg-[#F1F3F6] text-[#667085]",
+    dot: "bg-[#667085]",
+    label: "Draft",
+  },
 };
 
 export default function RfpTracker() {

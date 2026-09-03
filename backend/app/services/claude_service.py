@@ -6,19 +6,8 @@ from anthropic import Anthropic, OverloadedError
 
 from app.services.reference_docs import REFERENCE_CONTENT
 
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-# ============================================================
-# ANTHROPIC CLIENT
-# ============================================================
-
-client = Anthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY")
-)
-
-
-# ============================================================
-# GENERATE CSR PROPOSAL
-# ============================================================
 
 async def generate_proposal(
     vision: str,
@@ -196,37 +185,11 @@ IMPORTANT:
 - partner_requirements must contain 5–8 items.
 """
 
-
-    # ========================================================
-    # RETRY CONFIGURATION
-    # ========================================================
-
     max_retries = 5
-
-
-    # ========================================================
-    # CLAUDE REQUEST
-    # ========================================================
 
     for attempt in range(max_retries):
 
         try:
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                f"Claude proposal generation attempt "
-                f"{attempt + 1}/{max_retries}"
-            )
-
-            print(
-                "=================================================="
-            )
-
-
             response = client.messages.create(
                 model="claude-sonnet-4-6",
                 max_tokens=4000,
@@ -239,11 +202,6 @@ IMPORTANT:
                 ],
             )
 
-
-            # =================================================
-            # CHECK RESPONSE
-            # =================================================
-
             if (
                 not response.content
                 or len(response.content) == 0
@@ -252,93 +210,43 @@ IMPORTANT:
                     "Claude returned empty content."
                 )
 
-
             raw_text = response.content[0].text.strip()
-
-
-            print(
-                f"Claude response received "
-                f"({len(raw_text)} characters)"
-            )
-
-
-            # =================================================
-            # CLEAN RESPONSE
-            # =================================================
 
             cleaned_text = raw_text
 
-
-            # Remove accidental markdown code fences
             if cleaned_text.startswith("```json"):
 
                 cleaned_text = cleaned_text[
                     len("```json"):
                 ]
 
-
             elif cleaned_text.startswith("```"):
-
                 cleaned_text = cleaned_text[
                     len("```"):
                 ]
 
-
             if cleaned_text.endswith("```"):
-
                 cleaned_text = cleaned_text[
                     :-len("```")
                 ]
 
-
             cleaned_text = cleaned_text.strip()
 
-
-            # =================================================
-            # PARSE JSON
-            # =================================================
-
             try:
-
                 result = json.loads(
                     cleaned_text
                 )
 
             except json.JSONDecodeError as json_error:
-
-                print(
-                    "\nClaude returned invalid JSON."
-                )
-
-                print(
-                    f"JSON error: {json_error}"
-                )
-
-                print(
-                    "\nRaw Claude response:"
-                )
-
-                print(raw_text)
-
                 raise Exception(
                     "Claude returned invalid JSON."
                 )
-
-
-            # =================================================
-            # VALIDATE RESPONSE TYPE
-            # =================================================
 
             if not isinstance(result, dict):
 
                 raise Exception(
                     "Claude response must be a JSON object."
                 )
-
-
-            # =================================================
-            # GET GENERATED VALUES
-            # =================================================
 
             project_title = result.get(
                 "project_title"
@@ -356,32 +264,17 @@ IMPORTANT:
                 "partner_requirements"
             )
 
-
-            # =================================================
-            # VALIDATE PROJECT TITLE
-            # =================================================
-
             if not project_title:
 
                 raise Exception(
                     "Missing project_title in Claude response."
                 )
 
-
-            # =================================================
-            # VALIDATE PROPOSAL
-            # =================================================
-
             if not proposal:
 
                 raise Exception(
                     "Missing proposal in Claude response."
                 )
-
-
-            # =================================================
-            # VALIDATE KEY ACTIVITIES
-            # =================================================
 
             if not isinstance(
                 key_activities,
@@ -399,11 +292,6 @@ IMPORTANT:
                     "key_activities cannot be empty."
                 )
 
-
-            # =================================================
-            # VALIDATE PARTNER REQUIREMENTS
-            # =================================================
-
             if not isinstance(
                 partner_requirements,
                 list
@@ -420,32 +308,16 @@ IMPORTANT:
                     "partner_requirements cannot be empty."
                 )
 
-
-            # =================================================
-            # CLEAN KEY ACTIVITIES
-            # =================================================
-
             key_activities = [
                 str(activity).strip()
                 for activity in key_activities
                 if activity
             ]
-
-
-            # =================================================
-            # CLEAN PARTNER REQUIREMENTS
-            # =================================================
-
             partner_requirements = [
                 str(requirement).strip()
                 for requirement in partner_requirements
                 if requirement
             ]
-
-
-            # =================================================
-            # FINAL VALIDATION
-            # =================================================
 
             if not key_activities:
 
@@ -460,46 +332,6 @@ IMPORTANT:
                     "No valid partner requirements generated."
                 )
 
-
-            # =================================================
-            # PRINT PROJECT TITLE
-            # =================================================
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "PROJECT TITLE"
-            )
-
-            print(
-                "=================================================="
-            )
-
-            print(
-                project_title
-            )
-
-
-            # =================================================
-            # PRINT KEY ACTIVITIES
-            # =================================================
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "KEY ACTIVITIES"
-            )
-
-            print(
-                "=================================================="
-            )
-
             for index, activity in enumerate(
                 key_activities,
                 start=1
@@ -508,24 +340,6 @@ IMPORTANT:
                 print(
                     f"{index}. {activity}"
                 )
-
-
-            # =================================================
-            # PRINT PARTNER REQUIREMENTS
-            # =================================================
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "WHAT THE CSR FUNDER IS LOOKING FOR IN A PARTNER"
-            )
-
-            print(
-                "=================================================="
-            )
 
             for index, requirement in enumerate(
                 partner_requirements,
@@ -536,102 +350,18 @@ IMPORTANT:
                     f"{index}. {requirement}"
                 )
 
-
-            # =================================================
-            # PRINT PROPOSAL
-            # =================================================
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "PROPOSAL"
-            )
-
-            print(
-                "=================================================="
-            )
-
-            print(
-                proposal
-            )
-
-
-            # =================================================
-            # PRINT GENERATION SUMMARY
-            # =================================================
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "PROPOSAL GENERATION COMPLETED"
-            )
-
-            print(
-                "=================================================="
-            )
-
-            print(
-                f"Project title: {project_title}"
-            )
-
-            print(
-                f"Key activities: "
-                f"{len(key_activities)}"
-            )
-
-            print(
-                f"Partner requirements: "
-                f"{len(partner_requirements)}"
-            )
-
-            print(
-                f"Proposal characters: "
-                f"{len(proposal)}"
-            )
-
-            print(
-                "==================================================\n"
-            )
-
-
-            # =================================================
-            # RETURN STRUCTURED RESULT
-            # =================================================
-
             return {
                 "project_title": project_title,
                 "proposal": proposal,
                 "key_activities": key_activities,
                 "partner_requirements": partner_requirements,
             }
-
-
-        # =====================================================
-        # CLAUDE OVERLOADED
-        # =====================================================
-
         except OverloadedError:
 
             wait_time = min(
                 2 ** attempt,
                 30
             )
-
-            print(
-                f"Claude overloaded "
-                f"(attempt {attempt + 1}/{max_retries})"
-            )
-
-            print(
-                f"Retrying in {wait_time} seconds..."
-            )
-
 
             if attempt == max_retries - 1:
 
@@ -640,38 +370,11 @@ IMPORTANT:
                     "Please try again in a few minutes."
                 )
 
-
             await asyncio.sleep(
                 wait_time
             )
 
-
-        # =====================================================
-        # OTHER ERRORS
-        # =====================================================
-
         except Exception as e:
-
-            print(
-                "\n"
-                "=================================================="
-            )
-
-            print(
-                "CLAUDE PROPOSAL GENERATION FAILED"
-            )
-
-            print(
-                "=================================================="
-            )
-
-            print(
-                str(e)
-            )
-
-            print(
-                "==================================================\n"
-            )
 
             raise Exception(
                 f"Proposal generation failed: {str(e)}"

@@ -12,13 +12,8 @@ async def auth_middleware(
     request: Request,
     db: AsyncSession = Depends(get_db)
 ):
-    # 1 Get token from cookie
-
-    print("Cookies:", request.cookies)
 
     token = request.cookies.get("access_token")
-
-    print("Token:", token)
 
     if not token:
         raise HTTPException(
@@ -50,8 +45,6 @@ async def auth_middleware(
 
     # 4️ Compare DB token with cookie token
     db_token = (user.access_token or "").strip()
-
-    print("User ID:", user_id)
 
     if not secrets.compare_digest(
         db_token,

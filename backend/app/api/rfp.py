@@ -97,10 +97,6 @@ async def generate_project(
                 []
             )
 
-            # -----------------------------------
-            # COUNTS
-            # -----------------------------------
-
             ngo_matched_count = len(project_matches)
 
             rfp_sent_count = sum(
@@ -127,10 +123,6 @@ async def generate_project(
                 if match.declined is True
             )
 
-            # -----------------------------------
-            # DUE DATE
-            # -----------------------------------
-
             due_date = None
 
             if project.created_at:
@@ -143,19 +135,7 @@ async def generate_project(
                 else None
             )
 
-            # -----------------------------------
-            # STATUS
-            # -----------------------------------
-
             status = "draft"
-
-            # -----------------------------------
-            # 1. CLOSED
-            #
-            # Today exceeds due date
-            # AND no accepted
-            # AND no rejected
-            # -----------------------------------
 
             if (
                 due_date_date
@@ -164,36 +144,13 @@ async def generate_project(
                 and rejected_count == 0
             ):
                 status = "closed"
-
-            # -----------------------------------
-            # 2. NOT YET SENT
-            #
-            # NGOs matched
-            # BUT no RFP sent
-            # -----------------------------------
-
             elif (
                 ngo_matched_count > 0
                 and rfp_sent_count == 0
             ):
                 status = "not_yet_sent"
-
-            # -----------------------------------
-            # 3. PARTNER ACCEPTED
-            #
-            # At least one NGO accepted
-            # -----------------------------------
-
             elif accepted_count > 0:
                 status = "partner_accepted"
-
-            # -----------------------------------
-            # 4. RESPONSES RECEIVED
-            #
-            # Interested = true
-            # Accepted = false
-            # Rejected = false
-            # -----------------------------------
 
             elif any(
                 match.interested is True
@@ -203,43 +160,21 @@ async def generate_project(
             ):
                 status = "responses_received"
 
-            # -----------------------------------
-            # 5. SENT
-            #
-            # At least one RFP sent
-            # but no response yet
-            # -----------------------------------
-
             elif rfp_sent_count > 0:
                 status = "sent"
 
-            # -----------------------------------
-            # RESPONSE
-            # -----------------------------------
-
             data.append({
                 "id": project.id,
-
                 "status": status,
-
                 "project_vision": project.vision,
-
                 "geography": project.geography,
-
                 "budget": project.budget,
-
                 "created_at": project.created_at,
-
                 "due_date": due_date,
-
                 "ngo_matched_count": ngo_matched_count,
-
                 "rfp_sent_count": rfp_sent_count,
-
                 "eois_received_count": eois_received_count,
-
                 "accepted_count": accepted_count,
-
                 "rejected_count": rejected_count,
             })
 
@@ -265,9 +200,6 @@ async def get_rfp_project(
     current_user: User = Depends(auth_middleware),
 ):
     try:
-        # ---------------------------------------------------------
-        # 1. Get project request using project_id
-        # ---------------------------------------------------------
         project_result = await db.execute(
             select(ProjectRequest)
             .where(
@@ -284,9 +216,6 @@ async def get_rfp_project(
                 detail="Project not found"
             )
 
-        # ---------------------------------------------------------
-        # 2. Get all NGO matches for this project
-        # ---------------------------------------------------------
         match_result = await db.execute(
             select(ProjectNGOMatch)
             .where(
@@ -296,9 +225,6 @@ async def get_rfp_project(
 
         ngo_matches = match_result.scalars().all()
 
-        # ---------------------------------------------------------
-        # 3. Calculate counts
-        # ---------------------------------------------------------
         ngo_matched_count = len(ngo_matches)
 
         rfp_sent_count = sum(
@@ -306,14 +232,9 @@ async def get_rfp_project(
             if match.rfp_sent is True
         )
 
-        # ---------------------------------------------------------
-        # 4. Calculate due date = project created_at + 15 days
-        # ---------------------------------------------------------
         due_date = project.created_at + __import__("datetime").timedelta(days=15)
 
-        # ---------------------------------------------------------
-        # 5. Return response
-        # ---------------------------------------------------------
+
         return {
             "success": True,
             "status_code": 200,
@@ -491,9 +412,6 @@ async def get_rfp_eoi_detail(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        # --------------------------------------------------
-        # 1. Get Project
-        # --------------------------------------------------
 
         project_result = await db.execute(
             select(ProjectRequest)
@@ -510,9 +428,6 @@ async def get_rfp_eoi_detail(
                 detail="Project request not found",
             )
 
-        # --------------------------------------------------
-        # 2. Get NGO Match
-        # --------------------------------------------------
 
         ngo_match_result = await db.execute(
             select(ProjectNGOMatch)
@@ -530,9 +445,6 @@ async def get_rfp_eoi_detail(
                 detail="NGO match not found for this project",
             )
 
-        # --------------------------------------------------
-        # 3. Get Selected Program IDs
-        # --------------------------------------------------
 
         selected_program_ids = (
             ngo_match.selected_program_ids or []
@@ -549,15 +461,6 @@ async def get_rfp_eoi_detail(
             else None
         )
 
-        print("ORGANIZATION ID:", organization_id)
-        print(
-            "SELECTED PROGRAM IDS:",
-            selected_program_ids
-        )
-
-        # --------------------------------------------------
-        # 4. Fetch Organization + Program Details
-        # --------------------------------------------------
 
         organization = None
         programs = []
@@ -574,11 +477,6 @@ async def get_rfp_eoi_detail(
                     },
                     timeout=10.0,
                 )
-
-            print(
-                "PROGRAM API STATUS:",
-                program_response.status_code
-            )
 
             if program_response.status_code == 200:
 
@@ -608,16 +506,6 @@ async def get_rfp_eoi_detail(
                     )
                 )
 
-                print(
-                    "ORGANIZATION:",
-                    organization
-                )
-
-                print(
-                    "PROGRAMS:",
-                    programs
-                )
-
             else:
 
                 print(
@@ -626,51 +514,23 @@ async def get_rfp_eoi_detail(
                     program_response.text,
                 )
 
-        # --------------------------------------------------
-        # 5. Final Response
-        # --------------------------------------------------
-
         return {
             "success": True,
             "status_code": 200,
 
             "data": {
-
-                # ------------------------------------------
-                # NGO Match Details
-                # ------------------------------------------
-
                 "ngo": {
                     "match_id": str(ngo_match.id),
-
                     "organization_id": organization_id,
-
                     "name": ngo_match.name,
-
                     "description": ngo_match.description,
-
                     "area": ngo_match.area,
-
                     "selected_program_ids": selected_program_ids,
-
                     "eoi_note": ngo_match.eoi_note,
-
-                    # EOI status from ProjectNGOMatch
                     "accepted": ngo_match.accepted,
-
                     "declined": ngo_match.declined,
                 },
-
-                # ------------------------------------------
-                # Organization Details
-                # ------------------------------------------
-
                 "organization": organization,
-
-                # ------------------------------------------
-                # Selected Programs
-                # ------------------------------------------
-
                 "programs": programs,
             },
 
@@ -714,11 +574,7 @@ async def accept_eoi(
                 status_code=404,
                 detail="NGO match not found",
             )
-
-        # --------------------------------------------------
-        # Get NGO email
-        # --------------------------------------------------
-
+        
         ngo_email = ngo_match.contact_email
 
         if not ngo_email:
@@ -727,22 +583,12 @@ async def accept_eoi(
                 detail="NGO email address not available",
             )
 
-        print("NGO EMAIL:", ngo_email)
-
-        # --------------------------------------------------
-        # Update EOI status
-        # --------------------------------------------------
-
         ngo_match.interested = True
         ngo_match.accepted = True
         ngo_match.declined = False
 
         await db.commit()
         await db.refresh(ngo_match)
-
-        # --------------------------------------------------
-        # Send accepted email
-        # --------------------------------------------------
 
         subject = "Your EOI has been accepted"
 
@@ -817,10 +663,6 @@ async def decline_eoi(
                 detail="NGO match not found",
             )
 
-        # --------------------------------------------------
-        # Get NGO email
-        # --------------------------------------------------
-
         ngo_email = ngo_match.contact_email
 
         if not ngo_email:
@@ -829,10 +671,6 @@ async def decline_eoi(
                 detail="NGO email address not available",
             )
 
-        # --------------------------------------------------
-        # Update EOI status
-        # --------------------------------------------------
-
         ngo_match.interested = False
         ngo_match.accepted = False
         ngo_match.declined = True
@@ -840,9 +678,6 @@ async def decline_eoi(
         await db.commit()
         await db.refresh(ngo_match)
 
-        # --------------------------------------------------
-        # Send rejection email
-        # --------------------------------------------------
 
         subject = "Update on your EOI submission"
 

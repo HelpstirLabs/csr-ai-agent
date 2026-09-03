@@ -91,8 +91,6 @@ export default function Register() {
           pauseOnHover: false,
         });
 
-        console.log("Registration Result:", result.user_id);
-
         setUserId(result.user_id);
         setShowOtpScreen(true);
 
@@ -141,13 +139,6 @@ export default function Register() {
       }
 
       setIsVerifyingOtp(true);
-
-      console.log(
-        "Verifying OTP for User ID:",
-        userId,
-        "with OTP:",
-        otp
-      );
 
       const result = await userOTPVerification(
         userId,

@@ -244,8 +244,6 @@ async def login(
         if not phone.startswith("+"):
             phone = f"+91{phone}"
 
-        print("Login Phone:", phone)
-
         result = await db.execute(
             select(User).where(
                 User.phone_number == phone
@@ -305,10 +303,6 @@ async def verify_login_otp(
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        print("========== VERIFY LOGIN OTP START ==========")
-
-        print("Payload user_id:", payload.user_id)
-        print("Payload OTP:", payload.otp)
 
         result = await db.execute(
             select(User).where(
@@ -316,11 +310,7 @@ async def verify_login_otp(
             )
         )
 
-        print("Database query executed")
-
         user = result.scalar_one_or_none()
-
-        print("User result:", user)
 
         if not user:
             print("USER NOT FOUND FOR ID:", payload.user_id)
@@ -330,13 +320,6 @@ async def verify_login_otp(
                 detail="User not found"
             )
 
-        print("User found")
-        print("User ID:", user.id)
-        print("Phone:", user.phone_number)
-        print("Stored OTP:", user.otp)
-        print("OTP Expiry:", user.otp_expires_at)
-        print("OTP Attempts:", user.otp_attempts)
-
         # Check OTP exists
         if not user.otp:
             print("OTP DOES NOT EXIST")
@@ -345,8 +328,6 @@ async def verify_login_otp(
                 status_code=400,
                 detail="OTP not found. Please request a new OTP."
             )
-
-        print("OTP exists")
 
         # Check expiry
         if (
@@ -360,29 +341,16 @@ async def verify_login_otp(
                 detail="OTP expired. Please request a new OTP."
             )
 
-        print("OTP not expired")
-
         # Check attempts
         if user.otp_attempts >= 5:
-            print("MAX OTP ATTEMPTS REACHED")
 
             raise HTTPException(
                 status_code=400,
                 detail="Too many failed attempts"
             )
 
-        print("OTP attempts OK")
-
         # Verify OTP
         if user.otp != payload.otp:
-
-            print(
-                "INVALID OTP",
-                "Expected:",
-                user.otp,
-                "Received:",
-                payload.otp
-            )
 
             user.otp_attempts += 1
 
@@ -393,18 +361,12 @@ async def verify_login_otp(
                 detail="Invalid OTP"
             )
 
-        print("OTP VERIFIED SUCCESSFULLY")
-
         token = create_access_token(
             user_id=user.id,
             email=user.email
         )
 
-        print("JWT CREATED")
-
         is_first_login = user.login_count == 0
-
-        print("First login:", is_first_login)
 
         user.otp = None
         user.otp_sent = False
@@ -416,8 +378,6 @@ async def verify_login_otp(
 
         await db.commit()
 
-        print("USER UPDATED")
-
         response.set_cookie(
             key="access_token",
             value=token,
@@ -428,9 +388,6 @@ async def verify_login_otp(
             path="/"
         )
 
-        print("COOKIE SET")
-
-        print("========== VERIFY LOGIN OTP END ==========")
 
         return {
             "success": True,
@@ -467,14 +424,8 @@ async def verify_token(
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        print("========== VERIFY TOKEN START ==========")
-
-        # Step 1: Check cookies
-        print("All Cookies:", request.cookies)
 
         token = request.cookies.get("access_token")
-
-        print("Access Token:", token)
 
         if not token:
             print("NO ACCESS TOKEN FOUND")
@@ -484,24 +435,14 @@ async def verify_token(
                 detail="Not authenticated"
             )
 
-        print("TOKEN FOUND")
-
-        # Step 2: Decode token
-
-        print("SECRET KEY EXISTS:", bool(settings.SECRET_KEY))
-        print("ALGORITHM:", settings.ALGORITHM)
-
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
 
-        print("JWT PAYLOAD:", payload)
 
         user_id = payload.get("user_id")
-
-        print("USER ID FROM TOKEN:", user_id)
 
         if not user_id:
             print("USER ID MISSING IN TOKEN")
@@ -511,8 +452,6 @@ async def verify_token(
                 detail="Invalid token"
             )
 
-        print("USER ID FOUND")
-
         # Step 3: Fetch user
 
         result = await db.execute(
@@ -521,11 +460,7 @@ async def verify_token(
             )
         )
 
-        print("DATABASE QUERY DONE")
-
         user = result.scalar_one_or_none()
-
-        print("USER FROM DATABASE:", user)
 
         if not user:
             print("USER DOES NOT EXIST")
@@ -534,10 +469,6 @@ async def verify_token(
                 status_code=401,
                 detail="User not found"
             )
-
-        print("USER VERIFIED")
-
-        print("========== VERIFY TOKEN SUCCESS ==========")
 
         return {
             "token": True,
@@ -553,10 +484,6 @@ async def verify_token(
 
     except JWTError as e:
 
-        print("JWT ERROR:")
-        print(type(e).__name__)
-        print(str(e))
-
         raise HTTPException(
             status_code=401,
             detail="Invalid or expired token"
@@ -568,10 +495,6 @@ async def verify_token(
 
 
     except Exception as e:
-
-        print("GENERAL ERROR:")
-        print(type(e).__name__)
-        print(str(e))
 
         raise HTTPException(
             status_code=401,

@@ -24,8 +24,6 @@ export const AuthProvider = ({ children }) => {
                 "https://helpstir.in/csr-api/auth/verifytoken",
                 { withCredentials: true }
             );
-            console.log(response)
-
             if (response.status === 200 && response.data.token) {
                 setIsAuthenticated(true);
                 setUser(response.data.name);
@@ -68,7 +66,7 @@ export const AuthProvider = ({ children }) => {
         const response = await axios.post('https://helpstir.in/csr-api/auth/verify-login-otp', { user_id: userId, otp }, { withCredentials: true });
     
         const data = await response.data;
-        console.log(data)
+
         if(data.token) {
             setIsAuthenticated(true);
             setUser(data.user.name);

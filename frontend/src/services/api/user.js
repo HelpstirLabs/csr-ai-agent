@@ -30,7 +30,7 @@ export const userRegister = async (formData) => {
 
 export const userOTPVerification = async (userId, otp) => {
   try {
-    console.log("Sending OTP verification request for User ID:", userId, "with OTP:", otp);
+
     const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
       method: "POST",
       headers: {
@@ -59,7 +59,6 @@ export const userOTPVerification = async (userId, otp) => {
 
 export const userOTPResend = async (userId) => {
   try {
-    console.log("Sending OTP resend request for User ID:", userId);
     const response = await fetch(`${API_BASE_URL}/auth/resend-otp`, {
       method: "POST",
       headers: {

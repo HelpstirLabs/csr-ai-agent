@@ -98,7 +98,6 @@ export default function Login() {
                     pauseOnHover: false,
                 });
 
-
                 if (firstLogin === 0) {
                     navigate("/welcome");
                 } else {

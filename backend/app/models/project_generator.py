@@ -9,31 +9,130 @@ from app.core.database import Base
 class ProjectRequest(Base):
     __tablename__ = "project_requests"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
 
-    vision = Column(Text, nullable=False)
-    gender = Column(String(100), nullable=True)
-    geography = Column(String(255), nullable=True)
-    budget = Column(String(100), nullable=True)
-    duration = Column(String(50), nullable=True)
-    beneficiary = Column(String(255), nullable=True)
-    area = Column(String(255), nullable=True)
-    scale = Column(String(100), nullable=True)
+    vision = Column(
+        Text,
+        nullable=False
+    )
 
-    proposal = Column(Text, nullable=True)
-    project_title = Column(Text, nullable=True)
-    key_activities = Column(JSONB, nullable=True)
-    partner_requirements = Column(JSONB, nullable=True)
-    created_by = Column(String(13), nullable=False)
+    gender = Column(
+        String(100),
+        nullable=True
+    )
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    geography = Column(
+        String(255),
+        nullable=True
+    )
+
+    budget = Column(
+        String(100),
+        nullable=True
+    )
+
+    duration = Column(
+        String(50),
+        nullable=True
+    )
+
+    beneficiary = Column(
+        JSONB,
+        nullable=True
+    )
+
+    area = Column(
+        String(255),
+        nullable=True
+    )
+
+    scale = Column(
+        String(100),
+        nullable=True
+    )
+
+    age_group = Column(
+        String(100),
+        nullable=True
+    )
+
+    gender_focus = Column(
+        String(100),
+        nullable=True
+    )
+
+    technology_approach = Column(
+        String(255),
+        nullable=True
+    )
+
+    timeline_type = Column(
+        String(50),
+        nullable=True,
+        default="estimated"
+    )
+
+    start = Column(
+        String(255),
+        nullable=True
+    )
+
+    start_date = Column(
+        String(50),
+        nullable=True
+    )
+
+    end_date = Column(
+        String(50),
+        nullable=True
+    )
+
+    section135 = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
+    proposal = Column(
+        Text,
+        nullable=True
+    )
+
+    project_title = Column(
+        Text,
+        nullable=True
+    )
+
+    key_activities = Column(
+        JSONB,
+        nullable=True
+    )
+
+    partner_requirements = Column(
+        JSONB,
+        nullable=True
+    )
+
+    created_by = Column(
+        String(13),
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
 
     ngos = relationship(
         "ProjectNGOMatch",
         back_populates="project",
         cascade="all, delete-orphan"
     )
-
 
 class ProjectNGOMatch(Base):
     __tablename__ = "project_ngo_matches"

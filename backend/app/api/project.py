@@ -51,8 +51,15 @@ async def generate_project(
             beneficiary=payload.beneficiary,
             area=payload.area,
             scale=payload.scale,
+            age_group=payload.age_group,
+            gender_focus=payload.gender_focus,
+            technology_approach=payload.technology_approach,
+            timeline_type=payload.timeline_type,
+            start=payload.start,
+            start_date=payload.start_date,
+            end_date=payload.end_date,
+            section135=payload.section135,
         )
-
         project_title = generated.get("project_title")
 
         proposal = generated.get("proposal")
@@ -193,9 +200,17 @@ async def generate_project(
             budget=payload.budget,
             duration=payload.duration,
             beneficiary=payload.beneficiary,
-            created_by=current_user.id,
             area=payload.area,
             scale=payload.scale,
+            age_group=payload.age_group,
+            gender_focus=payload.gender_focus,
+            technology_approach=payload.technology_approach,
+            timeline_type=payload.timeline_type,
+            start=payload.start,
+            start_date=payload.start_date,
+            end_date=payload.end_date,
+            section135=payload.section135,
+            created_by=current_user.id,
             project_title=project_title,
             proposal=proposal,
             key_activities=key_activities,

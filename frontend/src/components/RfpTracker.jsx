@@ -215,13 +215,13 @@ export default function RfpTracker() {
                         {/* Status */}
                         <td className="px-4 py-5">
                           <span
-                            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-[10px] px-3 py-2 text-[11px] font-medium ${status.wrapper}`}
+                            className={`inline-flex items-center gap-2 whitespace-nowrap rounded-[10px] px-3 py-2 text-[11px] font-medium ${status?.wrapper}`}
                           >
                             <span
-                              className={`h-2 w-2 rounded-full ${status.dot}`}
+                              className={`h-2 w-2 rounded-full ${status?.dot}`}
                             />
 
-                            {status.label}
+                            {status?.label}
                           </span>
                         </td>
                       </tr>
@@ -294,14 +294,14 @@ export default function RfpTracker() {
                         py-1.5
                         text-[10px]
                         font-medium
-                        ${status.wrapper}
+                        ${status?.wrapper}
                       `}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${status.dot}`}
+                        className={`h-1.5 w-1.5 rounded-full ${status?.dot}`}
                       />
 
-                      {status.label}
+                      {status?.label}
                     </span>
                   </div>
 

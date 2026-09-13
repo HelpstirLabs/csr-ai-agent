@@ -2,15 +2,65 @@ from typing import Optional, Any
 from pydantic import BaseModel, EmailStr
 
 
+from typing import Optional, List
+from pydantic import BaseModel, Field, ConfigDict
+
+
 class ProjectGenerateRequest(BaseModel):
+
+    model_config = ConfigDict(
+        populate_by_name=True
+    )
+
     vision: str
+
     gender: Optional[str] = None
+
     geography: Optional[str] = None
+
     budget: Optional[str] = None
+
     duration: Optional[str] = None
-    beneficiary: Optional[str] = None
+
+    beneficiary: Optional[List[str]] = None
+
     area: Optional[str] = None
+
     scale: Optional[str] = None
+
+    age_group: Optional[str] = Field(
+        default=None,
+        alias="ageGroup"
+    )
+
+    gender_focus: Optional[str] = Field(
+        default=None,
+        alias="genderFocus"
+    )
+
+    technology_approach: Optional[str] = Field(
+        default=None,
+        alias="technologyApproach"
+    )
+
+    timeline_type: Optional[str] = Field(
+        default="estimated",
+        alias="timelineType"
+    )
+
+    start: Optional[str] = None
+
+    start_date: Optional[str] = Field(
+        default=None,
+        alias="startDate"
+    )
+
+    end_date: Optional[str] = Field(
+        default=None,
+        alias="endDate"
+    )
+
+    section135: bool = False
 
 
 class NGODetailResponse(BaseModel):

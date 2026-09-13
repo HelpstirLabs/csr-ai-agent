@@ -529,7 +529,7 @@ export default function RfpTrackerDetail() {
                           {ngo?.interested === true ? (
                             <button
                               onClick={() =>
-                                navigate(`/rfp/${projectId}/${ngo.id}`)
+                                navigate(`/rfptracker/${projectId}/${ngo.id}`)
                               }
                               className="rounded-xl bg-gradient-to-r from-[#3769F5] to-[#087CFA] px-3.5 py-2 text-[11px] font-semibold text-white shadow-[0_5px_15px_rgba(37,99,235,0.2)] transition hover:shadow-[0_7px_20px_rgba(37,99,235,0.3)]"
                             >

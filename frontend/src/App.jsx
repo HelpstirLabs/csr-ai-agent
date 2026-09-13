@@ -58,7 +58,7 @@ function App() {
             </PrivateRoute>}
         />
         <Route
-          path="/rfp/:projectId/:ngomatchId"
+          path="/rfptracker/:projectId/:ngomatchId"
           element={
             <PrivateRoute>
               <RFPEOI />

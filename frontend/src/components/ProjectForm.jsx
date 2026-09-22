@@ -35,13 +35,15 @@ export default function ProjectForm() {
     const [showCommunityOptions, setShowCommunityOptions] = useState(false);
     const [communitySearch, setCommunitySearch] = useState("");
     const [showMoreDetails, setShowMoreDetails] = useState(false);
+    const [openDropdown, setOpenDropdown] = useState(null);
 
     const communityDropdownRef = useRef(null);
+    const geographyRef = useRef(null);
 
 
     const [formData, setFormData] = useState({
         vision: "",
-        geography: "",
+        geography: [],
         budget: "",
         duration: "",
         beneficiary: ["Out-of-school children"],
@@ -107,7 +109,7 @@ export default function ProjectForm() {
             missingFields.push("Vision");
         }
 
-        if (!geography) {
+        if (!geography?.length) {
             missingFields.push("Geography");
         }
 
@@ -795,6 +797,23 @@ export default function ProjectForm() {
 
     const briefStrength = getBriefStrength();
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                geographyRef.current &&
+                !geographyRef.current.contains(event.target)
+            ) {
+                setOpenDropdown(null);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
 
     return (
         <div className="w-full min-h-screen ">
@@ -876,49 +895,118 @@ export default function ProjectForm() {
                                         Where
                                     </h3>
 
-                                    <select
-                                        value={formData.geography}
-                                        onChange={(e) =>
-                                            handleSelect("geography", e.target.value)
-                                        }
-                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="">Select State</option>
+                                    <div ref={geographyRef} className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setOpenDropdown(
+                                                    openDropdown === "geography" ? null : "geography"
+                                                )
+                                            }
+                                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            {formData.geography?.length > 0
+                                                ? `${formData.geography.length} state${formData.geography.length > 1 ? "s" : ""
+                                                } selected`
+                                                : "Select State(s)"}
+                                        </button>
 
-                                        {[
-                                            "Andhra Pradesh",
-                                            "Arunachal Pradesh",
-                                            "Assam",
-                                            "Bihar",
-                                            "Chhattisgarh",
-                                            "Goa",
-                                            "Gujarat",
-                                            "Haryana",
-                                            "Himachal Pradesh",
-                                            "Jharkhand",
-                                            "Karnataka",
-                                            "Kerala",
-                                            "Madhya Pradesh",
-                                            "Maharashtra",
-                                            "Manipur",
-                                            "Meghalaya",
-                                            "Mizoram",
-                                            "Nagaland",
-                                            "Odisha",
-                                            "Punjab",
-                                            "Rajasthan",
-                                            "Sikkim",
-                                            "Tamil Nadu",
-                                            "Telangana",
-                                            "Tripura",
-                                            "Uttar Pradesh",
-                                            "Uttarakhand",
-                                            "West Bengal",
-                                        ].map((state) => (
-                                            <option key={state} value={state}>
-                                                {state}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {openDropdown === "geography" && (
+                                            <div className="absolute z-50 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
+                                                <div className="max-h-60 overflow-y-auto p-2">
+                                                    {[
+                                                        "Andhra Pradesh",
+                                                        "Arunachal Pradesh",
+                                                        "Assam",
+                                                        "Bihar",
+                                                        "Chhattisgarh",
+                                                        "Delhi",
+                                                        "Goa",
+                                                        "Gujarat",
+                                                        "Haryana",
+                                                        "Himachal Pradesh",
+                                                        "Jharkhand",
+                                                        "Karnataka",
+                                                        "Kerala",
+                                                        "Madhya Pradesh",
+                                                        "Maharashtra",
+                                                        "Manipur",
+                                                        "Meghalaya",
+                                                        "Mizoram",
+                                                        "Nagaland",
+                                                        "Odisha",
+                                                        "Punjab",
+                                                        "Rajasthan",
+                                                        "Sikkim",
+                                                        "Tamil Nadu",
+                                                        "Telangana",
+                                                        "Tripura",
+                                                        "Uttar Pradesh",
+                                                        "Uttarakhand",
+                                                        "West Bengal",
+                                                        "Pan India",
+                                                    ].map((state) => {
+                                                        const isSelected =
+                                                            formData.geography?.includes(state);
+
+                                                        return (
+                                                            <label
+                                                                key={state}
+                                                                className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-gray-50"
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isSelected}
+                                                                    onChange={() => {
+                                                                        setFormData((prev) => ({
+                                                                            ...prev,
+                                                                            geography: isSelected
+                                                                                ? prev.geography.filter(
+                                                                                    (item) =>
+                                                                                        item !== state
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.geography,
+                                                                                    state,
+                                                                                ],
+                                                                        }));
+                                                                    }}
+                                                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                />
+
+                                                                <span>{state}</span>
+                                                            </label>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {formData.geography?.length > 0 && (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {formData.geography.map((state) => (
+                                                <span
+                                                    key={state}
+                                                    className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700"
+                                                >
+                                                    {state}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                geography: prev.geography.filter(
+                                                                    (item) => item !== state
+                                                                ),
+                                                            }))
+                                                        }
+                                                        className="text-blue-500 hover:text-blue-700">
+                                                        ×
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>

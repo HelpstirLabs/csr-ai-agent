@@ -16,8 +16,8 @@ class ProjectGenerateRequest(BaseModel):
 
     gender: Optional[str] = None
 
-    geography: Optional[str] = None
-
+    geography: Optional[List[str]] = None
+    
     budget: Optional[str] = None
 
     duration: Optional[str] = None

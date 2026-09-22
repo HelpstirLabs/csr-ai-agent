@@ -26,7 +26,7 @@ class ProjectRequest(Base):
     )
 
     geography = Column(
-        String(255),
+        JSONB,
         nullable=True
     )
 

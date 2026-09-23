@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
         try {
             const response = await axios.get(
-                "https://helpstir.in/csr-api/auth/verifytoken",
+                "https://helpstir.in/fundstir-api/auth/verifytoken",
                 { withCredentials: true }
             );
             if (response.status === 200 && response.data.token) {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (phone) => {
         try {
             const response = await axios.post(
-                'https://helpstir.in/csr-api/auth/login',
+                'https://helpstir.in/fundstir-api/auth/login',
                 { phone },
                 { withCredentials: true }
             );
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     const loginOTPVerification = async (userId, otp) => {
       try {
 
-        const response = await axios.post('https://helpstir.in/csr-api/auth/verify-login-otp', { user_id: userId, otp }, { withCredentials: true });
+        const response = await axios.post('https://helpstir.in/fundstir-api/auth/verify-login-otp', { user_id: userId, otp }, { withCredentials: true });
     
         const data = await response.data;
 
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            const response = await axios.post('https://helpstir.in/csr-api/auth/logout', {}, { withCredentials: true });
+            const response = await axios.post('https://helpstir.in/fundstir-api/auth/logout', {}, { withCredentials: true });
             if (response.status === 200) {
             setIsAuthenticated(false);
             setUser(null);

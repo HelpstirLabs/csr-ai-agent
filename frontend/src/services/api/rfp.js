@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://helpstir.in/csr-api";
+const API_BASE_URL = "https://helpstir.in/fundstir-api";
 
 export const getRFPs = async () => {
     try {

@@ -272,7 +272,7 @@ export default function RFPEOIDetail() {
                         {ngo.logo ? (
 
                             <img
-                                src={`http://127.0.0.1:8000${ngo.logo}`}
+                                src={`https://helpstir.in${ngo.logo}`}
                                 alt={
                                     ngo.name ||
                                     "NGO Logo"

@@ -467,7 +467,7 @@ export default function RfpTrackerDetail() {
                             <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center overflow-hidden">
                               {ngo.logo ? (
                                 <img
-                                  src={`http://127.0.0.1:8000${ngo.logo}`}
+                                  src={`https://helpstir.in${ngo.logo}`}
                                   alt={ngo.name || "NGO Logo"}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {

@@ -529,6 +529,7 @@ async def get_rfp_eoi_detail(
                     "eoi_note": ngo_match.eoi_note,
                     "accepted": ngo_match.accepted,
                     "declined": ngo_match.declined,
+                    "logo": ngo_match.logo,
                 },
                 "organization": organization,
                 "programs": programs,

@@ -295,6 +295,7 @@ async def generate_project(
                 db.add(ngo_match)
                 saved_ngo_count += 1
 
+
             except ValueError:
 
                 logger.error(

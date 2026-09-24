@@ -203,17 +203,17 @@ export default function Login() {
                         </Link>
 
                         <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
-                            CSR Intelligence Platform
+                            Funder Intelligence Platform
                         </p>
                     </div>
 
                     <div className="flex-1 flex flex-col justify-center max-w-lg">
                         <p className="uppercase text-[11px] tracking-[0.15em] text-[#FFFFFF99] font-semibold mb-5 mt-10">
-                            For CSR leaders & grant-makers
+                            For Funder leaders & grant-makers
                         </p>
 
                         <h2 className="font-heading text-[36px] font-bold tracking-[-0.04em] leading-[1.1]">
-                            Deploy your CSR with
+                            Deploy your funder initiatives with
                             <br />
                             confidence and
                             <br />
@@ -288,7 +288,7 @@ export default function Login() {
                         </Link>
 
                         <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
-                            CSR Intelligence Platform
+                            Funder Intelligence Platform
                         </p>
                     </div>
 
@@ -310,7 +310,7 @@ export default function Login() {
                     </h1>
 
                     <p className="text-white/80 md:text-gray-600 text-sm lg:text-base mb-8 text-center md:text-left">
-                        Sign in to access your CSR workspace.
+                        Sign in to access your Funder workspace.
                     </p>
                     {!showOtpScreen ? (
                         <>

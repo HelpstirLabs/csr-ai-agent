@@ -821,7 +821,7 @@ export default function ProjectForm() {
 
                 <div className="mt-5 bg-[#F8F8FC] border border-gray-200 rounded-[24px] p-5">
 
-                    <div className="bg-[#ECECF6] rounded-xl p-1 flex items-center">
+                    {/* <div className="bg-[#ECECF6] rounded-xl p-1 flex items-center">
                         <button
                             onClick={() => setActiveTab("vision")}
                             className={`flex-1 font-medium rounded-lg py-1.5 text-[12px] transition-all ${activeTab === "vision"
@@ -830,7 +830,7 @@ export default function ProjectForm() {
                                 }`}>
                             Write your vision
                         </button>
-                    </div>
+                    </div> */}
 
                     {activeTab === "vision" && (
                         <div>
@@ -1820,8 +1820,21 @@ export default function ProjectForm() {
                                                 <div className="flex items-start gap-4 flex-1">
 
 
-                                                    <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center text-[#4A4A6A] font-semibold">
-                                                        {initials}
+                                                    <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center overflow-hidden">
+                                                        {ngo.logo ? (
+                                                            <img
+                                                                src={`http://127.0.0.1:8000${ngo.logo}`}
+                                                                alt={ngo.name || "NGO Logo"}
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = "none";
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-[#4A4A6A] font-semibold text-sm">
+                                                                {initials}
+                                                            </span>
+                                                        )}
                                                     </div>
 
 

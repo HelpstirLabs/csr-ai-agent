@@ -256,7 +256,7 @@ export default function Register() {
             </Link>
 
             <p className="text-[11px] text-[#FFFFFF99] mt-2 tracking-wide">
-              CSR Intelligence Platform
+              Funder Intelligence Platform
             </p>
           </div>
 
@@ -267,7 +267,7 @@ export default function Register() {
             </p>
 
             <h2 className="font-heading text-[42px] font-bold tracking-[-0.04em] leading-[1.1]">
-              Join 200+ CSR leaders
+              Join 200+ Funder leaders
               <br />
               building better impact,
               <br />
@@ -283,7 +283,7 @@ export default function Register() {
               {[
                 "Free to browse — pay only on project execution",
                 "Access to 300+ verified NGOs across India",
-                "AI-designed projects matched to your CSR mandate",
+                "AI-designed projects matched to your Funder mandate",
               ].map((item, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-7 h-7 rounded-full bg-white/10">

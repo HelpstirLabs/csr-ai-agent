@@ -464,8 +464,21 @@ export default function RfpTrackerDetail() {
 
                         <td className="px-6 py-4">
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#2874FF] text-[13px] font-bold text-white">
-                              {getInitials(ngoName)}
+                            <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center overflow-hidden">
+                              {ngo.logo ? (
+                                <img
+                                  src={`http://127.0.0.1:8000${ngo.logo}`}
+                                  alt={ngo.name || "NGO Logo"}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <span className="text-[#4A4A6A] font-semibold text-sm">
+                                  {getInitials(ngoName)}
+                                </span>
+                              )}
                             </div>
 
                             <div className="min-w-0">

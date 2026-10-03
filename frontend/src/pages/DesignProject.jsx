@@ -40,20 +40,20 @@ export default function DesignProject() {
         }`}
       >
         <main className="p-8 pt-20">
-          <h1 className="font-heading text-[22px] font-bold">
+          {/* <h1 className="font-heading text-[22px] font-bold">
             Design a Project
           </h1>
 
           <p className="mt-2 text-[13px] text-gray-500">
             Describe your intent or configure step-by-step.
             The AI designs the full project from NGO network data.
-          </p>
+          </p> */}
 
           {/* <div className="mt-8">
             <ProjectFlow />
           </div> */}
 
-          <div className="mt-8">
+          <div className="mt-0">
             <ProjectForm />
           </div>
         </main>

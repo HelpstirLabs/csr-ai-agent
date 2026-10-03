@@ -228,32 +228,32 @@ export default function Login() {
                         </p>
 
                         <div className="border-t border-white/20 mt-14 pt-10 flex gap-16">
-                            <div>
+                            {/* <div>
                                 <h3 className="font-heading text-[28px] font-bold">
                                     ₹4.2 Cr
                                 </h3>
                                 <p className="text-blue-200 mt-2 text-[11px]">
                                     Deployed this FY
                                 </p>
-                            </div>
+                            </div> */}
 
-                            <div>
+                            {/* <div>
                                 <h3 className="font-heading text-[28px] font-bold">
                                     300+
                                 </h3>
                                 <p className="text-blue-200 mt-2 text-[11px]">
                                     Verified NGOs
                                 </p>
-                            </div>
+                            </div> */}
 
-                            <div>
+                            {/* <div>
                                 <h3 className="font-heading text-[28px] font-bold">
                                     28
                                 </h3>
                                 <p className="text-blue-200 mt-2 text-[11px]">
                                     Districts active
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

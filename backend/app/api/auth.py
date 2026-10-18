@@ -24,15 +24,24 @@ router = APIRouter(
 )
 
 
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(
     data: RegisterSchema,
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        # Check existing email
+        phone = data.phone.strip()
+
+        if not phone.startswith("+"):
+            phone = f"+91{phone}"
+
+        # Check whether email OR phone number already exists
         result = await db.execute(
-            select(User).where(User.email == data.email)
+            select(User).where(
+                (User.email == data.email) |
+                (User.phone_number == phone)
+            )
         )
 
         existing_user = result.scalar_one_or_none()
@@ -40,13 +49,8 @@ async def register(
         if existing_user:
             raise HTTPException(
                 status_code=400,
-                detail="Email already exists"
+                detail="Account already exists"
             )
-
-        phone = data.phone.strip()
-
-        if not phone.startswith("+"):
-            phone = f"+91{phone}"
 
         # Generate secure 6-digit OTP
         otp = str(secrets.randbelow(900000) + 100000)
@@ -56,7 +60,6 @@ async def register(
             email=data.email,
             phone_number=phone,
             company_name=data.company_name,
-
             otp=otp,
             otp_sent=True,
             otp_verified=False,
@@ -92,7 +95,6 @@ async def register(
             status_code=500,
             detail=str(e)
         )
-        
 
 @router.post("/verify-otp")
 async def verify_otp(
@@ -382,8 +384,8 @@ async def verify_login_otp(
             key="access_token",
             value=token,
             httponly=True,
-            secure=True,
-            samesite="none",
+            secure=False,
+            samesite="lax",
             max_age=60 * 60 * 24 * 7,
             path="/"
         )

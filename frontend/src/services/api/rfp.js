@@ -1,45 +1,45 @@
 const API_BASE_URL = "https://helpstir.in/fundstir-api";
 
 export const getRFPs = async () => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/rfp/list`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include"
-        });
-        if (!response.ok) {
-            throw new Error("Failed to fetch NGO's");
-        }
-
-        const data = await response.json();
-
-        return data;
-    } catch (error) {
-        console.error("Error fetching RFPs:", error);
-        throw error;
+  try {
+    const response = await fetch(`${API_BASE_URL}/rfp/list`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include"
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch NGO's");
     }
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching RFPs:", error);
+    throw error;
+  }
 };
 
 export const getRFPDetails = async (projectId) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/rfp/${projectId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include"
-        });
-        if (!response.ok) {
-            throw new Error("Failed to fetch RFP details");
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Error fetching RFP details:", error);
-        throw error;
+  try {
+    const response = await fetch(`${API_BASE_URL}/rfp/${projectId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include"
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch RFP details");
     }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching RFP details:", error);
+    throw error;
+  }
 };
 
 export const getEOIDetails = async (projectId, ngoMatchId) => {
@@ -125,3 +125,32 @@ export const submitDecline = async (ngoMatchId) => {
     throw error;
   }
 };
+
+
+export const getEOIInfo = async (projectId, ngoMatchId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/rfp/ngo/info/${projectId}/${ngoMatchId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail || data.message || "Failed to decline EOI"
+      );
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error declining EOI:", error);
+    throw error;
+  }
+}

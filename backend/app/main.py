@@ -15,11 +15,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8088",
-        "http://localhost:4173",
-        "http://localhost:5173",
-        "http://127.0.0.1:4173",
-        "http://127.0.0.1:8088"
+        "https://helpstir.in/fundstir-api",
+        "https://helpstir.in/fundstir",
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -27,7 +27,7 @@ class User(Base):
     # Basic Details
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
-    phone_number = Column(String(20), unique=True, nullable=False)
+    phone_number = Column(String(20))
     company_name = Column(String(255))
 
     # OTP & Authentication

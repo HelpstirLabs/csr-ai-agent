@@ -28,7 +28,7 @@ export default function ProjectForm() {
     const [generatedProject, setGeneratedProject] = useState(null);
     const [ngoList, setNGOList] = useState([])
     const [loading, setLoading] = useState(false);
-    const [selectedNgo, setSelectedNgo] = useState(null);
+    const [selectedNgos, setSelectedNgos] = useState([]);
     const [isSendingRFP, setIsSendingRFP] = useState(false);
 
     const [projectId, setProjectId] = useState(null)
@@ -446,32 +446,60 @@ export default function ProjectForm() {
         doc.save(`${filename || "proposal"}.pdf`);
     };
 
+    const handleNgoSelection = (ngo) => {
+        setSelectedNgos((prev) => {
+            const alreadySelected = prev.some(
+                (selected) => selected.org_id === ngo.org_id
+            );
+
+            if (alreadySelected) {
+                return prev.filter(
+                    (selected) => selected.org_id !== ngo.org_id
+                );
+            }
+
+            return [...prev, ngo];
+        });
+    };
+
     const handleSendRFP = async () => {
-        if (!selectedNgo) {
-            toast.error("Please select an NGO first.");
+        if (selectedNgos.length === 0) {
+            toast.error("Please select at least one NGO.");
             return;
         }
 
-        if (!selectedNgo.contact_email) {
-            toast.error("Selected NGO does not have a contact email.");
+        const invalidNgo = selectedNgos.find(
+            (ngo) => !ngo.contact_email
+        );
+
+        if (invalidNgo) {
+            toast.error(
+                `${invalidNgo.name} does not have a contact email.`
+            );
             return;
         }
 
         setIsSendingRFP(true);
 
         try {
-            const response = await sendRFP(projectId, selectedNgo.org_id);
+            const orgIds = selectedNgos.map((ngo) => ngo.org_id);
+
+            const response = await sendRFP(projectId, orgIds);
 
             if (!response.success) {
-                throw new Error(response.detail.message || "Failed to send RFP");
+                throw new Error(
+                    response.detail?.message || "Failed to send RFP"
+                );
             }
 
-            toast.success("RFP sent successfully to the NGO.");
+            toast.success(
+                `RFP sent successfully to ${orgIds.length} NGO(s).`
+            );
 
+            setSelectedNgos([]);
         } catch (error) {
             console.error("Send RFP error:", error);
             toast.error(error.message || "Failed to send RFP.");
-
         } finally {
             setIsSendingRFP(false);
         }
@@ -725,6 +753,8 @@ export default function ProjectForm() {
         setCommunitySearch("");
         setShowCommunityOptions(false);
     };
+
+
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -1640,7 +1670,7 @@ export default function ProjectForm() {
                                         setGeneratedProject(null);
                                         setNGOList([]);
                                         setLoading(false);
-                                        setSelectedNgo(null);
+                                        setSelectedNgos(null);
                                         setIsSendingRFP(false);
                                         setFormData({
                                             vision: "",
@@ -1821,20 +1851,20 @@ export default function ProjectForm() {
 
 
                                                     <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center overflow-hidden">
-                                                        {ngo.logo ? (
+                                                        {/* {ngo.logo ? (
                                                             <img
-                                                                src={`https://helpstir.in/${ngo.logo}`}
+                                                                src={`http://127.0.0.1:8000${ngo.logo}`}
                                                                 alt={ngo.name || "NGO Logo"}
                                                                 className="w-full h-full object-cover"
                                                                 onError={(e) => {
                                                                     e.currentTarget.style.display = "none";
                                                                 }}
                                                             />
-                                                        ) : (
-                                                            <span className="text-[#4A4A6A] font-semibold text-sm">
-                                                                {initials}
-                                                            </span>
-                                                        )}
+                                                        ) : ( */}
+                                                        <span className="text-[#4A4A6A] font-semibold text-sm">
+                                                            {initials}
+                                                        </span>
+                                                        {/* )} */}
                                                     </div>
 
 
@@ -1863,7 +1893,7 @@ export default function ProjectForm() {
 
                                                 <div className="flex items-center gap-4 ml-6">
 
-                                                    <div className="flex items-center gap-3">
+                                                    {/* <div className="flex items-center gap-3">
                                                         <div className="w-14 h-[4px] rounded-full bg-gray-200 overflow-hidden">
                                                             <div
                                                                 className={`h-full rounded-full ${ngo.score >= 90
@@ -1888,15 +1918,17 @@ export default function ProjectForm() {
                                                         >
                                                             {ngo.score}
                                                         </span>
-                                                    </div>
+                                                    </div> */}
 
                                                     <input
-                                                        type="radio"
-                                                        name="selectedNgo"
+                                                        type="checkbox"
+                                                        name="selectedNgos"
                                                         value={ngo.org_id}
-                                                        checked={selectedNgo?.org_id === ngo.org_id}
-                                                        onChange={() => setSelectedNgo(ngo)}
-                                                        className="w-5 h-5"
+                                                        checked={selectedNgos.some(
+                                                            (selected) => selected.org_id === ngo.org_id
+                                                        )}
+                                                        onChange={() => handleNgoSelection(ngo)}
+                                                        className="w-5 h-5 accent-[#2952F3] cursor-pointer rounded-xl"
                                                     />
                                                 </div>
                                             </div>
@@ -1909,7 +1941,7 @@ export default function ProjectForm() {
                                 )}
 
 
-                                <div className="flex mt-10 bg-[#FFF6E8] border border-[#F4D29A] rounded-2xl p-3 gap-4">
+                                {/* <div className="flex mt-10 bg-[#FFF6E8] border border-[#F4D29A] rounded-2xl p-3 gap-4">
                                     <div className="flex items-center justify-center">
                                         <p className="font-semibold text-[#92400E] text-[14px]">
                                             🔒
@@ -1927,16 +1959,18 @@ export default function ProjectForm() {
                                         </p>
                                     </div>
 
-                                </div>
+                                </div> */}
 
 
                                 <div className="grid grid-cols-2 gap-4 mt-6">
                                     <button
                                         onClick={handleSendRFP}
-                                        disabled={!selectedNgo || isSendingRFP}
+                                        disabled={selectedNgos.length === 0 || isSendingRFP}
                                         className="bg-[#2952F3] text-[13px] hover:bg-[#1F45DD] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 rounded-xl font-semibold"
                                     >
-                                        {isSendingRFP ? "Sending RFP..." : "Send RFP to selected NGOs"}
+                                        {isSendingRFP
+                                            ? "Sending Proposal..."
+                                            : `Send Proposal to ${selectedNgos.length} NGO${selectedNgos.length !== 1 ? "s" : ""}`}
                                     </button>
 
                                     <button

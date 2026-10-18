@@ -149,7 +149,7 @@ async def generate_project(
             )
 
         ngo_url = (
-            "http://127.0.0.1:80"
+            "http://127.0.0.1:8088"
             "/api/v1/project-generator/need_capture"
         )
 

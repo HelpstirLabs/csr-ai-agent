@@ -470,7 +470,7 @@ async def get_rfp_eoi_detail(
             async with httpx.AsyncClient() as client:
 
                 program_response = await client.post(
-                    "http://127.0.0.1:8000/api/v1/project-generator/programs/by-ids",
+                    "http://127.0.0.1:8088/api/v1/project-generator/programs/by-ids",
                     json={
                         "program_ids": selected_program_ids,
                         "org_id": organization_id,

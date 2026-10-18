@@ -26,6 +26,12 @@ const statusStyles = {
     dot: "bg-[#2952F3]",
     label: "Closed",
   },
+
+  sent: {
+    wrapper: "bg-[#EAF1FF] text-[#2952F3]",
+    dot: "bg-[#2952F3]",
+    label: "Sent",
+  },
 };
 
 export default function RfpTracker() {

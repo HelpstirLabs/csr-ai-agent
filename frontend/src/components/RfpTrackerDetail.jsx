@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getRFPDetails } from "../services/api/rfp";
 import { generateProposalPdf } from "../utils/generateProposalPdf";
+import { toast } from "react-toastify";
+import { sendRFP } from "../services/api/project";
 
 const NA = "NA";
 
@@ -142,6 +144,7 @@ export default function RfpTrackerDetail() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sendingNgoId, setSendingNgoId] = useState(null);
 
 
   const fetchRfpDetail = async () => {
@@ -211,6 +214,40 @@ export default function RfpTrackerDetail() {
       setNgoMatches([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendRFP = async (ngo) => {
+    if (!ngo?.org_id) {
+      toast.error("NGO organization ID is missing.");
+      return;
+    }
+
+    if (!ngo.contact_email) {
+      toast.error(`${ngo.name} does not have a contact email.`);
+      return;
+    }
+
+    try {
+      setSendingNgoId(ngo.id);
+
+      const response = await sendRFP(projectId, [ngo.org_id]);
+
+      if (!response.success) {
+        throw new Error(
+          response.detail?.message ||
+          response.detail ||
+          "Failed to send RFP"
+        );
+      }
+
+      toast.success(`RFP sent successfully to ${ngo.name}.`);
+      fetchRfpDetail()
+    } catch (error) {
+      console.error("Send RFP error:", error);
+      toast.error(error.message || "Failed to send RFP.");
+    } finally {
+      setSendingNgoId(null);
     }
   };
 
@@ -287,6 +324,9 @@ export default function RfpTrackerDetail() {
     firstRfpSentNgo?.rfp_sent_at ||
     firstRfpSentNgo?.sent_at ||
     null;
+
+
+
 
 
   return (
@@ -464,37 +504,14 @@ export default function RfpTrackerDetail() {
 
                         <td className="px-6 py-4">
                           <div className="flex min-w-0 items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-[#E8E8F1] flex items-center justify-center overflow-hidden">
-                              {ngo.logo ? (
-                                <img
-                                  src={`http://127.0.0.1:8000${ngo.logo}`}
-                                  alt={ngo.name || "NGO Logo"}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none";
-                                  }}
-                                />
-                              ) : (
-                                <span className="text-[#4A4A6A] font-semibold text-sm">
-                                  {getInitials(ngoName)}
-                                </span>
-                              )}
-                            </div>
-
                             <div className="min-w-0">
                               <button
-                                // onClick={() => {
-                                //   console.log(
-                                //     "Open NGO profile:",
-                                //     ngo?.org_id || NA
-                                //   );
-                                // }}
-                                className="block max-w-full truncate text-left text-[15px] font-medium text-[#2952F3] hover:underline"
-                              >
+
+                                className="block max-w-full truncate text-left text-[15px] font-medium text-[#2952F3]">
                                 {ngoName}
                               </button>
 
-                              <p className="mt-0.5 truncate text-[13px] text-[#64748B]">
+                              <p className="mt-0.5 whitespace-normal break-words text-[13px] text-[#64748B]">
                                 {ngoLocation}
                               </p>
                             </div>
@@ -554,15 +571,12 @@ export default function RfpTrackerDetail() {
                             </span>
                           ) : (
                             <button
-                              onClick={() => {
-                                // console.log(
-                                //   "Send RFP:",
-                                //   ngo?.org_id || "N/A"
-                                // );
-                              }}
-                              className="rounded-xl border border-[#DDE3EA] bg-white px-5 py-2.5 text-[14px] font-medium text-[#071D3A] transition hover:bg-[#F8FAFC]"
+                              type="button"
+                              onClick={() => handleSendRFP(ngo)}
+                              disabled={sendingNgoId === ngo.id}
+                              className="rounded-xl border border-[#DDE3EA] bg-white px-3 py-2.5 text-[12px] font-medium text-[#071D3A] transition hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              Send RFP
+                              {sendingNgoId === ngo.id ? "Sending..." : "Send RFP"}
                             </button>
                           )}
                         </td>
@@ -575,6 +589,8 @@ export default function RfpTrackerDetail() {
           </div>
 
         </div>
+
+
 
         <div className="h-fit rounded-[22px] border border-[#E2E6EC] bg-white p-6 shadow-sm">
 

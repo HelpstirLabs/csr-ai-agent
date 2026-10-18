@@ -55,32 +55,36 @@ export const fetchNGOsData = async () => {
     }
 }
 
-export const sendRFP = async (projectId, ngoId) => {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/project-generator/send-rfp/${projectId}/${ngoId}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include"
-      }
-    );
+export const sendRFP = async (projectId, orgIds) => {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/project-generator/send-rfp/${projectId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    org_ids: orgIds,
+                }),
+            }
+        );
 
-    const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      const backendError = new Error(data.detail?.message || "Failed to send RFP");
-      backendError.detail = data.detail;
-      backendError.status = response.status;
-      throw backendError;
+        if (!response.ok) {
+            const message =
+                data.detail?.message ||
+                (typeof data.detail === "string" ? data.detail : null) ||
+                "Failed to send RFP";
+
+            throw new Error(message);
+        }
+
+        return data;
+    } catch (error) {
+        console.error("sendRFP API error:", error);
+        throw error;
     }
-
-    return data;
-
-  } catch (error) {
-    console.error("sendRFP API error:", error);
-    throw error;
-  }
 };
